@@ -437,7 +437,8 @@ function renderIncome() {
   if (mf) recs = recs.filter(r=>r.member===mf);
   const list = document.getElementById('incomeList');
   if (!recs.length) { list.innerHTML = '<div class="empty">暂无记录</div>'; return; }
-  list.innerHTML = recs.slice(0,200).map(r=>`<div class="record-item"><div class="record-info"><div class="record-main">${r.member||'公司'} - ${r.category}</div><div class="record-sub">${r.date}${r.note?' · '+r.note:''}</div></div><div class="record-amount income">+¥${r.amount.toLocaleString()}</div>${isAdmin?`<div class="record-actions"><button class="btn btn-outline btn-sm" onclick="editIncome(${r.id})">✏️</button><button class="btn btn-danger btn-sm" onclick="deleteIncome(${r.id})">🗑</button></div>`:''}</div>`).join('');
+  const total = recs.reduce((s,r)=>s+r.amount, 0);
+  list.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:var(--primary-bg);border-radius:8px;margin-bottom:8px"><span style="font-size:13px;color:var(--text-secondary)">筛选合计 (${recs.length}笔)</span><span style="font-size:16px;font-weight:700;color:var(--success)">+¥${total.toLocaleString()}</span></div>` + recs.slice(0,200).map(r=>`<div class="record-item"><div class="record-info"><div class="record-main">${r.member||'公司'} - ${r.category}</div><div class="record-sub">${r.date}${r.note?' · '+r.note:''}</div></div><div class="record-amount income">+¥${r.amount.toLocaleString()}</div>${isAdmin?`<div class="record-actions"><button class="btn btn-outline btn-sm" onclick="editIncome(${r.id})">✏️</button><button class="btn btn-danger btn-sm" onclick="deleteIncome(${r.id})">🗑</button></div>`:''}</div>`).join('');
 }
 function addIncome() {
   const cat=document.getElementById('incomeCat').value, member=document.getElementById('incomeMember').value, amount=parseFloat(document.getElementById('incomeAmount').value), date=document.getElementById('incomeDate').value, note=document.getElementById('incomeNote').value;
@@ -472,7 +473,8 @@ function renderExpense() {
   if (cf) recs = recs.filter(r=>r.category===cf);
   const list = document.getElementById('expenseList');
   if (!recs.length) { list.innerHTML = '<div class="empty">暂无记录</div>'; return; }
-  list.innerHTML = recs.slice(0,200).map(r=>{
+  const total = recs.reduce((s,r)=>s+r.amount, 0);
+  list.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:#fef2f2;border-radius:8px;margin-bottom:8px"><span style="font-size:13px;color:var(--text-secondary)">筛选合计 (${recs.length}笔)</span><span style="font-size:16px;font-weight:700;color:var(--danger)">-¥${total.toLocaleString()}</span></div>` + recs.slice(0,200).map(r=>{
     let badge = r.is_fully_reimbursed?'<span class="badge badge-success">已报销</span>':r.reimbursed_amount>0?`<span class="badge badge-warning">部分 ¥${r.reimbursed_amount}</span>`:'<span class="badge badge-info">未报销</span>';
     return `<div class="record-item"><div class="record-info"><div class="record-main">${r.category} ${badge}</div><div class="record-sub">${r.date}${r.note?' · '+r.note:''}</div></div><div class="record-amount expense">-¥${r.amount.toLocaleString()}</div>${isAdmin?`<div class="record-actions"><button class="btn btn-outline btn-sm" onclick="editExpense(${r.id})">✏️</button><button class="btn btn-danger btn-sm" onclick="deleteExpense(${r.id})">🗑</button></div>`:''}</div>`;
   }).join('');
