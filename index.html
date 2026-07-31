@@ -294,24 +294,12 @@ let currentPeriod = 'year';
 function markDirty() { hasChanges = true; document.getElementById('publishBtn').style.display = 'inline-flex'; }
 function getToken() { return localStorage.getItem('teamfund_gh_token') || ''; }
 
-// On page load, try to fetch latest data from raw GitHub (bypass CDN cache)
-(async function refreshFromGitHub() {
-  try {
-    const resp = await fetch('https://raw.githubusercontent.com/sunyayiii/team-fund/main/data.js?t=' + Date.now());
-    if (resp.ok) {
-      const text = await resp.text();
-      const fn = new Function(text + '; return DATA;');
-      const freshData = fn();
-      if (freshData && freshData.income_records) {
-        DB = freshData;
-        renderAll();
-      }
-    }
-  } catch(e) { console.warn('Refresh from GitHub failed:', e); }
-})();
-
-// Initial render (from local data.js)
-if (DB) renderAll();
+// Initial render
+if (DB) {
+  renderAll();
+} else {
+  document.getElementById('podium').innerHTML = '<div class="empty">数据加载中，请刷新页面...</div>';
+}
 
 // ============================================================
 // Publish to GitHub
