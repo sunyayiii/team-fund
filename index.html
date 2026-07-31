@@ -378,15 +378,13 @@ function renderHome() {
   const pName = periodName();
   document.querySelectorAll('.period-tag').forEach(el => el.textContent = pName);
 
-  // 个人罚款类收入（排除公司团建费）
-  const personalCats = ['家庭日加班','进度/分享','会议迟到','培训/纪要','个人主动出资'];
-  const personalIncome = DB.income_records.filter(r => personalCats.includes(r.category)).reduce((s,r) => s + r.amount, 0);
+  // 部门小金库余额 = 全部收入 - 全部支出（动态，始终是全量）
+  const totalIncome = DB.income_records.reduce((s,r) => s + r.amount, 0);
   const totalExpense = DB.expense_records.reduce((s,r) => s + r.amount, 0);
-  const totalReimbursed = DB.expense_records.reduce((s,r) => s + (r.reimbursed_amount || 0), 0);
-  const smallBalance = personalIncome - totalExpense + totalReimbursed;
+  const smallBalance = totalIncome - totalExpense;
 
   document.getElementById('balanceValue').textContent = `¥${smallBalance.toLocaleString('zh-CN',{minimumFractionDigits:2})}`;
-  document.getElementById('balanceDetail').textContent = `收入${personalIncome.toLocaleString()} - 支出${totalExpense.toLocaleString()} + 报销${totalReimbursed.toLocaleString()}`;
+  document.getElementById('balanceDetail').textContent = `全部收入${totalIncome.toLocaleString()} - 全部支出${totalExpense.toLocaleString()}`;
   document.getElementById('companyBalance').textContent = `¥${(DB.settings.company_balance||0).toLocaleString('zh-CN',{minimumFractionDigits:2})}`;
 
   // 筛选时间段的收支合计
