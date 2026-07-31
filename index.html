@@ -124,6 +124,7 @@ select.form-control{appearance:none;background:url("data:image/svg+xml,%3Csvg xm
     <div class="card">
       <div class="card-title">📈 收入合计 <span class="period-tag" style="font-size:11px;color:var(--primary)"></span></div>
       <div class="card-value" id="incomeTotal">--</div>
+      <div style="font-size:12px;color:var(--text-secondary);margin-top:4px" id="incomeBreakdown"></div>
     </div>
     <div class="card">
       <div class="card-title">💸 支出合计 <span class="period-tag" style="font-size:11px;color:var(--primary)"></span></div>
@@ -396,6 +397,9 @@ function renderHome() {
     filteredExpense = filteredExpense.filter(r => r.date >= dateFilter);
   }
   document.getElementById('incomeTotal').textContent = `¥${filteredIncome.reduce((s,r)=>s+r.amount,0).toLocaleString('zh-CN',{minimumFractionDigits:2})}`;
+  const personalAmt = filteredIncome.filter(r=>r.category!=='公司团建费').reduce((s,r)=>s+r.amount,0);
+  const companyAmt = filteredIncome.filter(r=>r.category==='公司团建费').reduce((s,r)=>s+r.amount,0);
+  document.getElementById('incomeBreakdown').textContent = `个人贡献 ¥${personalAmt.toLocaleString()} | 公司 ¥${companyAmt.toLocaleString()}`;
   document.getElementById('expenseTotal').textContent = `¥${filteredExpense.reduce((s,r)=>s+r.amount,0).toLocaleString('zh-CN',{minimumFractionDigits:2})}`;
 
   renderPodium();
