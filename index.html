@@ -106,6 +106,7 @@ select.form-control{appearance:none;background:url("data:image/svg+xml,%3Csvg xm
     <button class="time-filter" data-period="month">本月</button>
     <button class="time-filter" data-period="all">全部</button>
   </div>
+  <div id="thanksBanner" style="text-align:center;padding:12px 16px;margin-bottom:12px;background:linear-gradient(135deg,#fef9c3,#fde68a);border-radius:12px;font-size:14px;"></div>
   <div class="podium" id="podium"></div>
   <div class="stats-row">
     <div class="card">
@@ -123,6 +124,7 @@ select.form-control{appearance:none;background:url("data:image/svg+xml,%3Csvg xm
     <div class="card">
       <div class="card-title">📈 收入合计 <span class="period-tag" style="font-size:11px;color:var(--primary)"></span></div>
       <div class="card-value" id="incomeTotal">--</div>
+      <div style="font-size:12px;color:var(--text-secondary);margin-top:4px" id="incomeBreakdown"></div>
     </div>
     <div class="card">
       <div class="card-title">💸 支出合计 <span class="period-tag" style="font-size:11px;color:var(--primary)"></span></div>
@@ -413,6 +415,15 @@ function renderHome() {
   }
   document.getElementById('incomeTotal').textContent = `¥${filteredIncome.reduce((s,r)=>s+r.amount,0).toLocaleString('zh-CN',{minimumFractionDigits:2})}`;
   document.getElementById('expenseTotal').textContent = `¥${filteredExpense.reduce((s,r)=>s+r.amount,0).toLocaleString('zh-CN',{minimumFractionDigits:2})}`;
+
+  // 收入拆分：个人贡献 vs 公司
+  const personalFiltered = filteredIncome.filter(r => r.category !== '公司团建费');
+  const companyFiltered = filteredIncome.filter(r => r.category === '公司团建费');
+  document.getElementById('incomeBreakdown').textContent = `个人贡献 ¥${personalFiltered.reduce((s,r)=>s+r.amount,0).toLocaleString()} | 公司 ¥${companyFiltered.reduce((s,r)=>s+r.amount,0).toLocaleString()}`;
+
+  // 感谢横幅
+  const personalTotal = personalFiltered.reduce((s,r)=>s+r.amount,0);
+  document.getElementById('thanksBanner').innerHTML = `🎉 感谢每一位金主的慷慨贡献！(ノ´ヮ`)ノ*:・゚✧ 已累计 <b>¥${personalTotal.toLocaleString()}</b> 💪🫶`;
 
   renderPodium();
 }
