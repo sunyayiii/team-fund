@@ -6,183 +6,88 @@
 <title>团建经费记账</title>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
 <style>
-:root {
-  --primary: #4f46e5;
-  --primary-light: #818cf8;
-  --primary-bg: #eef2ff;
-  --gold: #fbbf24;
-  --gold-bg: linear-gradient(135deg, #fbbf24, #f59e0b);
-  --silver: #9ca3af;
-  --silver-bg: linear-gradient(135deg, #d1d5db, #9ca3af);
-  --bronze: #d97706;
-  --bronze-bg: linear-gradient(135deg, #f59e0b, #d97706);
-  --success: #10b981;
-  --danger: #ef4444;
-  --warning: #f59e0b;
-  --bg: #f8fafc;
-  --card: #ffffff;
-  --text: #1e293b;
-  --text-secondary: #64748b;
-  --border: #e2e8f0;
-  --radius: 12px;
-  --shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
-  --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1);
-}
-* { margin: 0; padding: 0; box-sizing: border-box; }
-body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  min-height: 100vh;
-  padding-bottom: 20px;
-}
-/* Header & Nav */
-.header {
-  background: var(--card);
-  border-bottom: 1px solid var(--border);
-  padding: 12px 16px;
-  position: sticky; top: 0; z-index: 100;
-  box-shadow: var(--shadow);
-}
-.header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-.header h1 { font-size: 18px; font-weight: 700; color: var(--primary); }
-.admin-btn {
-  padding: 6px 12px; border-radius: 20px; border: 1px solid var(--border);
-  background: var(--card); font-size: 12px; cursor: pointer; transition: all 0.2s;
-}
-.admin-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
-.nav { display: flex; gap: 4px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
-.nav-item {
-  flex-shrink: 0; padding: 8px 14px; border-radius: 20px; font-size: 13px;
-  font-weight: 500; cursor: pointer; transition: all 0.2s; background: transparent;
-  color: var(--text-secondary); border: none; white-space: nowrap;
-}
-.nav-item.active { background: var(--primary); color: white; }
-/* Page */
-.page { display: none; padding: 16px; max-width: 800px; margin: 0 auto; }
-.page.active { display: block; }
-/* Cards */
-.card { background: var(--card); border-radius: var(--radius); padding: 16px; margin-bottom: 16px; box-shadow: var(--shadow); }
-.card-title { font-size: 14px; color: var(--text-secondary); margin-bottom: 8px; font-weight: 500; }
-.card-value { font-size: 28px; font-weight: 700; }
-.card-value.positive { color: var(--success); }
-.card-value.negative { color: var(--danger); }
-.stats-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-/* Podium */
-.time-filters { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
-.time-filter {
-  padding: 6px 14px; border-radius: 16px; font-size: 12px; border: 1px solid var(--border);
-  background: var(--card); cursor: pointer; transition: all 0.2s;
-}
-.time-filter.active { background: var(--primary); color: white; border-color: var(--primary); }
-.podium { display: flex; align-items: flex-end; justify-content: center; gap: 8px; padding: 20px 0; min-height: 280px; }
-.podium-item { display: flex; flex-direction: column; align-items: center; width: 110px; }
-.podium-avatar {
-  width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center;
-  justify-content: center; font-size: 20px; font-weight: 700; color: white; margin-bottom: 8px;
-}
-.podium-avatar.gold { background: var(--gold-bg); }
-.podium-avatar.silver { background: var(--silver-bg); }
-.podium-avatar.bronze { background: var(--bronze-bg); }
-.podium-name { font-size: 14px; font-weight: 600; margin-bottom: 4px; text-align: center; }
-.podium-amount { font-size: 12px; color: var(--text-secondary); margin-bottom: 8px; }
-.podium-bar {
-  width: 85px; border-radius: 8px 8px 0 0; display: flex; align-items: flex-start;
-  justify-content: center; padding-top: 12px; font-size: 24px; font-weight: 700;
-  color: white; position: relative; overflow: hidden;
-}
-.podium-bar.gold { height: 120px; background: var(--gold-bg); }
-.podium-bar.silver { height: 90px; background: var(--silver-bg); }
-.podium-bar.bronze { height: 70px; background: var(--bronze-bg); }
-.podium-bar::after {
-  content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
-  background: linear-gradient(45deg, transparent 40%, rgba(255,255,255,0.3) 50%, transparent 60%);
-  animation: shimmer 3s infinite;
-}
-@keyframes shimmer { 0%{transform:translateX(-100%) translateY(-100%)} 100%{transform:translateX(100%) translateY(100%)} }
-/* Forms */
-.form-group { margin-bottom: 14px; }
-.form-group label { display: block; font-size: 13px; font-weight: 500; color: var(--text-secondary); margin-bottom: 6px; }
-.form-control {
-  width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px;
-  font-size: 14px; outline: none; transition: border-color 0.2s;
-}
-.form-control:focus { border-color: var(--primary); }
-select.form-control {
-  appearance: none;
-  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748b' d='M6 8L1 3h10z'/%3E%3C/svg%3E") no-repeat right 12px center;
-  padding-right: 36px;
-}
-.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-.btn {
-  padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 500;
-  border: none; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px;
-}
-.btn-primary { background: var(--primary); color: white; }
-.btn-primary:hover { background: #4338ca; }
-.btn-success { background: var(--success); color: white; }
-.btn-danger { background: var(--danger); color: white; }
-.btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
-.btn-sm { padding: 6px 10px; font-size: 12px; }
-.btn-block { width: 100%; justify-content: center; }
-/* Record List */
-.record-list { margin-top: 12px; }
-.record-item { display: flex; align-items: center; justify-content: space-between; padding: 12px; border-bottom: 1px solid var(--border); }
-.record-item:last-child { border-bottom: none; }
-.record-info { flex: 1; }
-.record-info .record-main { font-size: 14px; font-weight: 500; }
-.record-info .record-sub { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
-.record-amount { font-size: 16px; font-weight: 600; }
-.record-amount.income { color: var(--success); }
-.record-amount.expense { color: var(--danger); }
-.record-actions { display: flex; gap: 4px; margin-left: 8px; }
-.badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 500; }
-.badge-success { background: #d1fae5; color: #065f46; }
-.badge-warning { background: #fef3c7; color: #92400e; }
-.badge-info { background: #dbeafe; color: #1e40af; }
-/* Filter */
-.filter-bar { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
-.filter-bar .form-control { flex: 1; min-width: 120px; }
-/* Toast */
-.toast {
-  position: fixed; top: 20px; right: 20px; padding: 12px 20px; border-radius: 8px;
-  background: var(--text); color: white; font-size: 14px; z-index: 9999;
-  opacity: 0; transform: translateY(-10px); transition: all 0.3s; pointer-events: none;
-}
-.toast.show { opacity: 1; transform: translateY(0); }
-.toast.success { background: var(--success); }
-.toast.error { background: var(--danger); }
-/* Modal */
-.modal-overlay {
-  position: fixed; top:0; left:0; right:0; bottom:0; background: rgba(0,0,0,0.5);
-  z-index: 1000; display: none; align-items: center; justify-content: center; padding: 16px;
-}
-.modal-overlay.show { display: flex; }
-.modal { background: var(--card); border-radius: var(--radius); padding: 24px; width: 100%; max-width: 420px; max-height: 80vh; overflow-y: auto; }
-.modal h3 { margin-bottom: 16px; font-size: 18px; }
-/* Settings */
-.member-tag {
-  display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px;
-  border-radius: 16px; background: var(--primary-bg); font-size: 12px; margin: 3px;
-}
-.member-tag .remove { cursor: pointer; color: var(--danger); font-weight: bold; }
-.loading { text-align: center; padding: 40px; color: var(--text-secondary); }
-.empty { text-align: center; padding: 40px; color: var(--text-secondary); font-size: 14px; }
-/* Saving indicator */
-.saving { position: fixed; top: 60px; right: 16px; background: var(--warning); color: white; padding: 6px 12px; border-radius: 16px; font-size: 12px; z-index: 200; display: none; }
-.saving.show { display: block; }
+:root{--primary:#4f46e5;--primary-bg:#eef2ff;--gold:#fbbf24;--gold-bg:linear-gradient(135deg,#fbbf24,#f59e0b);--silver:#9ca3af;--silver-bg:linear-gradient(135deg,#d1d5db,#9ca3af);--bronze:#d97706;--bronze-bg:linear-gradient(135deg,#f59e0b,#d97706);--success:#10b981;--danger:#ef4444;--warning:#f59e0b;--bg:#f8fafc;--card:#fff;--text:#1e293b;--text-secondary:#64748b;--border:#e2e8f0;--radius:12px;--shadow:0 1px 3px rgba(0,0,0,.1)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:20px}
+.header{background:var(--card);border-bottom:1px solid var(--border);padding:12px 16px;position:sticky;top:0;z-index:100;box-shadow:var(--shadow)}
+.header-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.header h1{font-size:18px;font-weight:700;color:var(--primary)}
+.header-actions{display:flex;gap:8px;align-items:center}
+.admin-btn{padding:6px 12px;border-radius:20px;border:1px solid var(--border);background:var(--card);font-size:12px;cursor:pointer;transition:all .2s}
+.admin-btn.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+.publish-btn{padding:6px 14px;border-radius:20px;border:none;background:var(--success);color:#fff;font-size:12px;font-weight:600;cursor:pointer;display:none;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.7}}
+.nav{display:flex;gap:4px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.nav-item{flex-shrink:0;padding:8px 14px;border-radius:20px;font-size:13px;font-weight:500;cursor:pointer;transition:all .2s;background:0;color:var(--text-secondary);border:none;white-space:nowrap}
+.nav-item.active{background:var(--primary);color:#fff}
+.page{display:none;padding:16px;max-width:800px;margin:0 auto}
+.page.active{display:block}
+.card{background:var(--card);border-radius:var(--radius);padding:16px;margin-bottom:16px;box-shadow:var(--shadow)}
+.card-title{font-size:14px;color:var(--text-secondary);margin-bottom:8px;font-weight:500}
+.card-value{font-size:26px;font-weight:700}
+.card-value.positive{color:var(--success)}
+.card-value.negative{color:var(--danger)}
+.stats-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.time-filters{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.time-filter{padding:6px 14px;border-radius:16px;font-size:12px;border:1px solid var(--border);background:var(--card);cursor:pointer;transition:all .2s}
+.time-filter.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+.podium{display:flex;align-items:flex-end;justify-content:center;gap:8px;padding:20px 0;min-height:260px}
+.podium-item{display:flex;flex-direction:column;align-items:center;width:110px}
+.podium-avatar{width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;color:#fff;margin-bottom:8px}
+.podium-avatar.gold{background:var(--gold-bg)}.podium-avatar.silver{background:var(--silver-bg)}.podium-avatar.bronze{background:var(--bronze-bg)}
+.podium-name{font-size:13px;font-weight:600;margin-bottom:4px;text-align:center}
+.podium-amount{font-size:12px;color:var(--text-secondary);margin-bottom:8px}
+.podium-bar{width:85px;border-radius:8px 8px 0 0;display:flex;align-items:flex-start;justify-content:center;padding-top:12px;font-size:24px;font-weight:700;color:#fff;position:relative;overflow:hidden}
+.podium-bar.gold{height:120px;background:var(--gold-bg)}.podium-bar.silver{height:90px;background:var(--silver-bg)}.podium-bar.bronze{height:70px;background:var(--bronze-bg)}
+.podium-bar::after{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:linear-gradient(45deg,transparent 40%,rgba(255,255,255,.3) 50%,transparent 60%);animation:shimmer 3s infinite}
+@keyframes shimmer{0%{transform:translateX(-100%) translateY(-100%)}100%{transform:translateX(100%) translateY(100%)}}
+.form-group{margin-bottom:14px}
+.form-group label{display:block;font-size:13px;font-weight:500;color:var(--text-secondary);margin-bottom:6px}
+.form-control{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;outline:0;transition:border-color .2s}
+.form-control:focus{border-color:var(--primary)}
+select.form-control{appearance:none;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748b' d='M6 8L1 3h10z'/%3E%3C/svg%3E") no-repeat right 12px center;padding-right:36px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.btn{padding:10px 20px;border-radius:8px;font-size:14px;font-weight:500;border:none;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:6px}
+.btn-primary{background:var(--primary);color:#fff}.btn-primary:hover{background:#4338ca}
+.btn-success{background:var(--success);color:#fff}
+.btn-danger{background:var(--danger);color:#fff}
+.btn-outline{background:0;border:1px solid var(--border);color:var(--text)}
+.btn-sm{padding:6px 10px;font-size:12px}
+.btn-block{width:100%;justify-content:center}
+.record-list{margin-top:12px}
+.record-item{display:flex;align-items:center;justify-content:space-between;padding:12px;border-bottom:1px solid var(--border)}
+.record-item:last-child{border-bottom:none}
+.record-info{flex:1}
+.record-info .record-main{font-size:14px;font-weight:500}
+.record-info .record-sub{font-size:12px;color:var(--text-secondary);margin-top:2px}
+.record-amount{font-size:16px;font-weight:600}
+.record-amount.income{color:var(--success)}.record-amount.expense{color:var(--danger)}
+.record-actions{display:flex;gap:4px;margin-left:8px}
+.badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:500}
+.badge-success{background:#d1fae5;color:#065f46}.badge-warning{background:#fef3c7;color:#92400e}.badge-info{background:#dbeafe;color:#1e40af}
+.filter-bar{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.filter-bar .form-control{flex:1;min-width:120px}
+.toast{position:fixed;top:20px;right:20px;padding:12px 20px;border-radius:8px;background:var(--text);color:#fff;font-size:14px;z-index:9999;opacity:0;transform:translateY(-10px);transition:all .3s;pointer-events:none}
+.toast.show{opacity:1;transform:translateY(0)}.toast.success{background:var(--success)}.toast.error{background:var(--danger)}
+.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);z-index:1000;display:none;align-items:center;justify-content:center;padding:16px}
+.modal-overlay.show{display:flex}
+.modal{background:var(--card);border-radius:var(--radius);padding:24px;width:100%;max-width:420px;max-height:80vh;overflow-y:auto}
+.modal h3{margin-bottom:16px;font-size:18px}
+.member-tag{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:16px;background:var(--primary-bg);font-size:12px;margin:3px}
+.member-tag .remove{cursor:pointer;color:var(--danger);font-weight:bold}
+.empty{text-align:center;padding:40px;color:var(--text-secondary);font-size:14px}
 </style>
 </head>
 <body>
-
 <div id="toast" class="toast"></div>
-<div id="saving" class="saving">💾 保存中...</div>
 
-<!-- Header -->
 <div class="header">
   <div class="header-top">
     <h1>💰 团建经费</h1>
-    <button class="admin-btn" id="adminBtn" onclick="toggleAdmin()">🔒 管理</button>
+    <div class="header-actions">
+      <button class="publish-btn" id="publishBtn" onclick="publish()">🚀 发布</button>
+      <button class="admin-btn" id="adminBtn" onclick="toggleAdmin()">🔒 管理</button>
+    </div>
   </div>
   <div class="nav">
     <button class="nav-item active" data-tab="home">🏆 总览</button>
@@ -195,50 +100,56 @@ select.form-control {
 
 <!-- Home -->
 <div class="page active" id="page-home">
-  <div class="podium-section">
-    <div class="time-filters">
-      <button class="time-filter active" data-period="year">今年</button>
-      <button class="time-filter" data-period="quarter">本季</button>
-      <button class="time-filter" data-period="month">本月</button>
-      <button class="time-filter" data-period="all">全部</button>
+  <div class="time-filters">
+    <button class="time-filter active" data-period="year">今年</button>
+    <button class="time-filter" data-period="quarter">本季</button>
+    <button class="time-filter" data-period="month">本月</button>
+    <button class="time-filter" data-period="all">全部</button>
+  </div>
+  <div class="podium" id="podium"></div>
+  <div class="stats-row">
+    <div class="card">
+      <div class="card-title">🏦 部门小金库余额</div>
+      <div class="card-value positive" id="balanceValue">--</div>
+      <div style="font-size:11px;color:var(--text-secondary);margin-top:4px" id="balanceDetail"></div>
     </div>
-    <div class="podium" id="podium"><div class="loading">加载中...</div></div>
+    <div class="card">
+      <div class="card-title">🏢 公司团建余额</div>
+      <div class="card-value positive" id="companyBalance">--</div>
+      <div style="font-size:11px;color:var(--text-secondary);margin-top:4px">管理员手动更新</div>
+    </div>
   </div>
   <div class="stats-row">
     <div class="card">
-      <div class="card-title">💰 经费余额</div>
-      <div class="card-value positive" id="balanceValue">--</div>
+      <div class="card-title">📈 收入合计 <span class="period-tag" style="font-size:11px;color:var(--primary)"></span></div>
+      <div class="card-value" id="incomeTotal">--</div>
     </div>
     <div class="card">
-      <div class="card-title">💸 累计支出</div>
+      <div class="card-title">💸 支出合计 <span class="period-tag" style="font-size:11px;color:var(--primary)"></span></div>
       <div class="card-value negative" id="expenseTotal">--</div>
     </div>
-  </div>
-  <div class="card">
-    <div class="card-title">📈 累计收入（含个人出资+公司报销）</div>
-    <div class="card-value" id="incomeTotal">--</div>
   </div>
 </div>
 
 <!-- Income -->
 <div class="page" id="page-income">
-  <div class="card" id="incomeForm" style="display:none;">
-    <h3 style="margin-bottom:12px;font-size:16px;">➕ 新增收入</h3>
+  <div class="card" id="incomeForm" style="display:none">
+    <h3 style="margin-bottom:12px;font-size:16px">➕ 新增收入</h3>
     <div class="form-row">
       <div class="form-group"><label>分类</label><select class="form-control" id="incomeCat"></select></div>
       <div class="form-group"><label>出资人</label><select class="form-control" id="incomeMember"></select></div>
     </div>
     <div class="form-row">
-      <div class="form-group"><label>金额（元）</label><input type="number" class="form-control" id="incomeAmount" /></div>
-      <div class="form-group"><label>日期</label><input type="date" class="form-control" id="incomeDate" /></div>
+      <div class="form-group"><label>金额（元）</label><input type="number" class="form-control" id="incomeAmount"></div>
+      <div class="form-group"><label>日期</label><input type="date" class="form-control" id="incomeDate"></div>
     </div>
-    <div class="form-group"><label>备注</label><input type="text" class="form-control" id="incomeNote" placeholder="" /></div>
+    <div class="form-group"><label>备注</label><input type="text" class="form-control" id="incomeNote"></div>
     <button class="btn btn-primary btn-block" onclick="addIncome()">确认录入</button>
   </div>
   <div class="card">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-      <h3 style="font-size:16px;">收入记录</h3>
-      <button class="btn btn-outline btn-sm" id="addIncomeBtn" style="display:none;" onclick="document.getElementById('incomeForm').style.display='block'">➕ 新增</button>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <h3 style="font-size:16px">收入记录</h3>
+      <button class="btn btn-outline btn-sm" id="addIncomeBtn" style="display:none" onclick="document.getElementById('incomeForm').style.display='block'">➕ 新增</button>
     </div>
     <div class="filter-bar">
       <select class="form-control" id="incomeFilterCat" onchange="renderIncome()"><option value="">全部分类</option></select>
@@ -250,28 +161,28 @@ select.form-control {
 
 <!-- Expense -->
 <div class="page" id="page-expense">
-  <div class="card" id="expenseForm" style="display:none;">
-    <h3 style="margin-bottom:12px;font-size:16px;">➕ 新增支出</h3>
+  <div class="card" id="expenseForm" style="display:none">
+    <h3 style="margin-bottom:12px;font-size:16px">➕ 新增支出</h3>
     <div class="form-row">
       <div class="form-group"><label>类目</label><select class="form-control" id="expenseCat"></select></div>
-      <div class="form-group"><label>金额（元）</label><input type="number" class="form-control" id="expenseAmount" /></div>
+      <div class="form-group"><label>金额（元）</label><input type="number" class="form-control" id="expenseAmount"></div>
     </div>
     <div class="form-row">
-      <div class="form-group"><label>日期</label><input type="date" class="form-control" id="expenseDate" /></div>
-      <div class="form-group"><label>备注</label><input type="text" class="form-control" id="expenseNote" /></div>
+      <div class="form-group"><label>日期</label><input type="date" class="form-control" id="expenseDate"></div>
+      <div class="form-group"><label>备注</label><input type="text" class="form-control" id="expenseNote"></div>
     </div>
-    <h4 style="font-size:14px;margin:12px 0 8px;color:var(--text-secondary);">报销信息</h4>
+    <h4 style="font-size:14px;margin:12px 0 8px;color:var(--text-secondary)">报销信息</h4>
     <div class="form-row">
-      <div class="form-group"><label>报销金额</label><input type="number" class="form-control" id="expenseReimbAmount" value="0" /></div>
-      <div class="form-group"><label>报销日期</label><input type="date" class="form-control" id="expenseReimbDate" /></div>
+      <div class="form-group"><label>报销金额</label><input type="number" class="form-control" id="expenseReimbAmount" value="0"></div>
+      <div class="form-group"><label>报销日期</label><input type="date" class="form-control" id="expenseReimbDate"></div>
     </div>
-    <div class="form-group"><label><input type="checkbox" id="expenseReimbDone" /> 已完成报销</label></div>
+    <div class="form-group"><label><input type="checkbox" id="expenseReimbDone"> 已完成报销</label></div>
     <button class="btn btn-primary btn-block" onclick="addExpense()">确认录入</button>
   </div>
   <div class="card">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-      <h3 style="font-size:16px;">支出记录</h3>
-      <button class="btn btn-outline btn-sm" id="addExpenseBtn" style="display:none;" onclick="document.getElementById('expenseForm').style.display='block'">➕ 新增</button>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <h3 style="font-size:16px">支出记录</h3>
+      <button class="btn btn-outline btn-sm" id="addExpenseBtn" style="display:none" onclick="document.getElementById('expenseForm').style.display='block'">➕ 新增</button>
     </div>
     <div class="filter-bar">
       <select class="form-control" id="expenseFilterCat" onchange="renderExpense()"><option value="">全部类目</option></select>
@@ -283,13 +194,13 @@ select.form-control {
 <!-- Detail -->
 <div class="page" id="page-detail">
   <div class="card">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-      <h3 style="font-size:16px;">收支明细</h3>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <h3 style="font-size:16px">收支明细</h3>
       <button class="btn btn-outline btn-sm" onclick="exportExcel()">📥 导出Excel</button>
     </div>
     <div class="filter-bar">
-      <input type="date" class="form-control" id="detailDateFrom" onchange="renderDetail()" style="min-width:130px;" />
-      <input type="date" class="form-control" id="detailDateTo" onchange="renderDetail()" style="min-width:130px;" />
+      <input type="date" class="form-control" id="detailDateFrom" onchange="renderDetail()" style="min-width:130px">
+      <input type="date" class="form-control" id="detailDateTo" onchange="renderDetail()" style="min-width:130px">
       <select class="form-control" id="detailFilterMember" onchange="renderDetail()"><option value="">全部成员</option></select>
     </div>
     <div class="record-list" id="detailList"></div>
@@ -299,37 +210,35 @@ select.form-control {
 <!-- Settings -->
 <div class="page" id="page-settings">
   <div class="card" id="settingsLocked"><div class="empty">🔒 请先点击右上角「管理」按钮解锁</div></div>
-  <div id="settingsContent" style="display:none;">
+  <div id="settingsContent" style="display:none">
     <div class="card">
-      <h3 style="font-size:16px;margin-bottom:12px;">💰 余额管理</h3>
-      <div class="form-group"><label>当前余额（元）</label>
-        <div style="display:flex;gap:8px;"><input type="number" class="form-control" id="settingsBalance" /><button class="btn btn-primary" onclick="updateBalance()">保存</button></div>
-      </div>
+      <h3 style="font-size:16px;margin-bottom:12px">🏢 公司团建余额</h3>
+      <div style="display:flex;gap:8px"><input type="number" class="form-control" id="settingsCompanyBalance"><button class="btn btn-primary" onclick="updateCompanyBalance()">保存</button></div>
     </div>
     <div class="card">
-      <h3 style="font-size:16px;margin-bottom:12px;">👥 成员管理</h3>
-      <div id="membersList" style="margin-bottom:12px;"></div>
-      <div style="display:flex;gap:8px;"><input type="text" class="form-control" id="newMemberName" placeholder="新成员姓名" /><button class="btn btn-success btn-sm" onclick="addMember()">添加</button></div>
+      <h3 style="font-size:16px;margin-bottom:12px">👥 成员管理</h3>
+      <div id="membersList" style="margin-bottom:12px"></div>
+      <div style="display:flex;gap:8px"><input type="text" class="form-control" id="newMemberName" placeholder="新成员姓名"><button class="btn btn-success btn-sm" onclick="addMember()">添加</button></div>
     </div>
     <div class="card">
-      <h3 style="font-size:16px;margin-bottom:12px;">📁 收入分类管理</h3>
-      <div id="incomeCatList" style="margin-bottom:12px;"></div>
-      <div style="display:flex;gap:8px;"><input type="text" class="form-control" id="newIncomeCat" placeholder="新分类" /><input type="number" class="form-control" id="newIncomeCatAmount" placeholder="默认金额" style="width:100px;" /><button class="btn btn-success btn-sm" onclick="addIncomeCat()">添加</button></div>
+      <h3 style="font-size:16px;margin-bottom:12px">📁 收入分类</h3>
+      <div id="incomeCatList" style="margin-bottom:12px"></div>
+      <div style="display:flex;gap:8px"><input type="text" class="form-control" id="newIncomeCat" placeholder="新分类"><input type="number" class="form-control" id="newIncomeCatAmount" placeholder="默认金额" style="width:100px"><button class="btn btn-success btn-sm" onclick="addIncomeCatSetting()">添加</button></div>
     </div>
     <div class="card">
-      <h3 style="font-size:16px;margin-bottom:12px;">📁 支出分类管理</h3>
-      <div id="expenseCatList" style="margin-bottom:12px;"></div>
-      <div style="display:flex;gap:8px;"><input type="text" class="form-control" id="newExpenseCat" placeholder="新类目" /><button class="btn btn-success btn-sm" onclick="addExpenseCat()">添加</button></div>
+      <h3 style="font-size:16px;margin-bottom:12px">📁 支出分类</h3>
+      <div id="expenseCatList" style="margin-bottom:12px"></div>
+      <div style="display:flex;gap:8px"><input type="text" class="form-control" id="newExpenseCat" placeholder="新类目"><button class="btn btn-success btn-sm" onclick="addExpenseCatSetting()">添加</button></div>
     </div>
     <div class="card">
-      <h3 style="font-size:16px;margin-bottom:12px;">🔑 修改密码</h3>
-      <div style="display:flex;gap:8px;"><input type="password" class="form-control" id="newPassword" placeholder="新密码" /><button class="btn btn-primary" onclick="updatePassword()">保存</button></div>
+      <h3 style="font-size:16px;margin-bottom:12px">🔑 修改密码</h3>
+      <div style="display:flex;gap:8px"><input type="password" class="form-control" id="newPassword" placeholder="新密码"><button class="btn btn-primary" onclick="updatePassword()">保存</button></div>
     </div>
     <div class="card">
-      <h3 style="font-size:16px;margin-bottom:12px;">🔗 GitHub Token</h3>
-      <p style="font-size:12px;color:var(--text-secondary);margin-bottom:8px;">用于保存数据到 GitHub（写入权限必需）</p>
-      <div style="display:flex;gap:8px;"><input type="password" class="form-control" id="ghTokenInput" placeholder="ghp_xxx..." /><button class="btn btn-primary" onclick="saveGhToken()">保存</button></div>
-      <div id="ghTokenStatus" style="margin-top:8px;font-size:12px;"></div>
+      <h3 style="font-size:16px;margin-bottom:12px">🔗 GitHub Token</h3>
+      <p style="font-size:12px;color:var(--text-secondary);margin-bottom:8px">用于「发布」功能推送数据到 GitHub Pages</p>
+      <div style="display:flex;gap:8px"><input type="password" class="form-control" id="ghTokenInput" placeholder="ghp_xxx..."><button class="btn btn-primary" onclick="saveGhToken()">保存</button></div>
+      <div id="ghTokenStatus" style="margin-top:8px;font-size:12px"></div>
     </div>
   </div>
 </div>
@@ -338,11 +247,8 @@ select.form-control {
 <div class="modal-overlay" id="passwordModal">
   <div class="modal">
     <h3>🔐 输入管理密码</h3>
-    <div class="form-group"><input type="password" class="form-control" id="adminPassword" placeholder="请输入密码" onkeydown="if(event.key==='Enter')checkPassword()" /></div>
-    <div style="display:flex;gap:8px;">
-      <button class="btn btn-primary" onclick="checkPassword()">确认</button>
-      <button class="btn btn-outline" onclick="closeModal('passwordModal')">取消</button>
-    </div>
+    <div class="form-group"><input type="password" class="form-control" id="adminPassword" placeholder="请输入密码" onkeydown="if(event.key==='Enter')checkPassword()"></div>
+    <div style="display:flex;gap:8px"><button class="btn btn-primary" onclick="checkPassword()">确认</button><button class="btn btn-outline" onclick="closeModal('passwordModal')">取消</button></div>
   </div>
 </div>
 
@@ -350,18 +256,12 @@ select.form-control {
 <div class="modal-overlay" id="editIncomeModal">
   <div class="modal">
     <h3>编辑收入记录</h3>
-    <input type="hidden" id="editIncomeId" />
+    <input type="hidden" id="editIncomeId">
     <div class="form-group"><label>分类</label><select class="form-control" id="editIncomeCat"></select></div>
     <div class="form-group"><label>出资人</label><select class="form-control" id="editIncomeMember"></select></div>
-    <div class="form-row">
-      <div class="form-group"><label>金额</label><input type="number" class="form-control" id="editIncomeAmount" /></div>
-      <div class="form-group"><label>日期</label><input type="date" class="form-control" id="editIncomeDate" /></div>
-    </div>
-    <div class="form-group"><label>备注</label><input type="text" class="form-control" id="editIncomeNote" /></div>
-    <div style="display:flex;gap:8px;margin-top:16px;">
-      <button class="btn btn-primary" onclick="saveEditIncome()">保存</button>
-      <button class="btn btn-outline" onclick="closeModal('editIncomeModal')">取消</button>
-    </div>
+    <div class="form-row"><div class="form-group"><label>金额</label><input type="number" class="form-control" id="editIncomeAmount"></div><div class="form-group"><label>日期</label><input type="date" class="form-control" id="editIncomeDate"></div></div>
+    <div class="form-group"><label>备注</label><input type="text" class="form-control" id="editIncomeNote"></div>
+    <div style="display:flex;gap:8px;margin-top:16px"><button class="btn btn-primary" onclick="saveEditIncome()">保存</button><button class="btn btn-outline" onclick="closeModal('editIncomeModal')">取消</button></div>
   </div>
 </div>
 
@@ -369,612 +269,311 @@ select.form-control {
 <div class="modal-overlay" id="editExpenseModal">
   <div class="modal">
     <h3>编辑支出记录</h3>
-    <input type="hidden" id="editExpenseId" />
-    <div class="form-row">
-      <div class="form-group"><label>类目</label><select class="form-control" id="editExpenseCat"></select></div>
-      <div class="form-group"><label>金额</label><input type="number" class="form-control" id="editExpenseAmount" /></div>
-    </div>
-    <div class="form-row">
-      <div class="form-group"><label>日期</label><input type="date" class="form-control" id="editExpenseDate" /></div>
-      <div class="form-group"><label>备注</label><input type="text" class="form-control" id="editExpenseNote" /></div>
-    </div>
-    <h4 style="font-size:14px;margin:12px 0 8px;color:var(--text-secondary);">报销信息</h4>
-    <div class="form-row">
-      <div class="form-group"><label>报销金额</label><input type="number" class="form-control" id="editExpenseReimbAmount" /></div>
-      <div class="form-group"><label>报销日期</label><input type="date" class="form-control" id="editExpenseReimbDate" /></div>
-    </div>
-    <div class="form-group"><label><input type="checkbox" id="editExpenseReimbDone" /> 已完成报销</label></div>
-    <div style="display:flex;gap:8px;margin-top:16px;">
-      <button class="btn btn-primary" onclick="saveEditExpense()">保存</button>
-      <button class="btn btn-outline" onclick="closeModal('editExpenseModal')">取消</button>
-    </div>
+    <input type="hidden" id="editExpenseId">
+    <div class="form-row"><div class="form-group"><label>类目</label><select class="form-control" id="editExpenseCat"></select></div><div class="form-group"><label>金额</label><input type="number" class="form-control" id="editExpenseAmount"></div></div>
+    <div class="form-row"><div class="form-group"><label>日期</label><input type="date" class="form-control" id="editExpenseDate"></div><div class="form-group"><label>备注</label><input type="text" class="form-control" id="editExpenseNote"></div></div>
+    <h4 style="font-size:14px;margin:12px 0 8px;color:var(--text-secondary)">报销信息</h4>
+    <div class="form-row"><div class="form-group"><label>报销金额</label><input type="number" class="form-control" id="editExpenseReimbAmount"></div><div class="form-group"><label>报销日期</label><input type="date" class="form-control" id="editExpenseReimbDate"></div></div>
+    <div class="form-group"><label><input type="checkbox" id="editExpenseReimbDone"> 已完成报销</label></div>
+    <div style="display:flex;gap:8px;margin-top:16px"><button class="btn btn-primary" onclick="saveEditExpense()">保存</button><button class="btn btn-outline" onclick="closeModal('editExpenseModal')">取消</button></div>
   </div>
 </div>
 
+<script src="data.js"></script>
 <script>
 // ============================================================
-// GitHub Storage Layer
+// State
 // ============================================================
-const REPO = 'sunyayiii/team-fund';
-const FILE_PATH = 'data.json';
-const API_BASE = `https://api.github.com/repos/${REPO}/contents/${FILE_PATH}`;
-const RAW_BASE = `https://raw.githubusercontent.com/${REPO}/main/${FILE_PATH}`;
+let DB = JSON.parse(JSON.stringify(DATA)); // Deep clone from data.js
+let isAdmin = false;
+let hasChanges = false;
+let currentPeriod = 'year';
 
-// Token stored in localStorage (set once by admin)
+function markDirty() { hasChanges = true; document.getElementById('publishBtn').style.display = 'inline-flex'; }
 function getToken() { return localStorage.getItem('teamfund_gh_token') || ''; }
 
-let DB = null; // The in-memory database
-let fileSha = null; // Current SHA for updates
-let isAdmin = false;
-let currentPeriod = 'year';
-let saveTimer = null;
-
-// Load data from GitHub
-async function loadData() {
-  try {
-    // First try raw URL (public, no rate limit, works for everyone)
-    const rawResp = await fetch(RAW_BASE + '?t=' + Date.now());
-    if (rawResp.ok) {
-      DB = await rawResp.json();
-    } else {
-      DB = getEmptyDB();
-    }
-    // Get SHA separately (needed for saving) - only if token available
-    const token = getToken();
-    if (token) {
-      try {
-        const apiResp = await fetch(API_BASE, { headers: { 'Authorization': `token ${token}` } });
-        if (apiResp.ok) {
-          const json = await apiResp.json();
-          fileSha = json.sha;
-        }
-      } catch(e) { console.warn('Could not get SHA:', e); }
-    }
-    renderAll();
-  } catch (e) {
-    console.error('Load failed:', e);
-    showToast('数据加载失败', 'error');
-  }
-}
-
-function getEmptyDB() {
-  return {
-    members: [],
-    income_categories: [],
-    expense_categories: [],
-    income_records: [],
-    expense_records: [],
-    settings: { admin_password: 'admin', current_balance: 0 }
-  };
-}
-
-// Save data to GitHub (debounced)
-function scheduleSave() {
-  if (saveTimer) clearTimeout(saveTimer);
-  document.getElementById('saving').classList.add('show');
-  saveTimer = setTimeout(() => saveToGitHub(), 1000);
-}
-
-async function saveToGitHub() {
+// ============================================================
+// Publish to GitHub
+// ============================================================
+async function publish() {
   const token = getToken();
-  if (!token) { showToast('请先在设置中配置 GitHub Token', 'error'); document.getElementById('saving').classList.remove('show'); return; }
-  try {
-    // Get latest SHA if we don't have it
-    if (!fileSha) {
-      const shaResp = await fetch(API_BASE, { headers: { 'Authorization': `token ${token}` } });
-      if (shaResp.ok) { fileSha = (await shaResp.json()).sha; }
-    }
-    const content = JSON.stringify(DB, null, 2);
-    const encoded = btoa(unescape(encodeURIComponent(content)));
-    const body = {
-      message: `update data ${new Date().toISOString().slice(0,16)}`,
-      content: encoded,
-    };
-    if (fileSha) body.sha = fileSha;
+  if (!token) { showToast('请先在设置中配置 GitHub Token', 'error'); return; }
 
-    const resp = await fetch(API_BASE, {
+  const btn = document.getElementById('publishBtn');
+  btn.textContent = '⏳ 发布中...'; btn.disabled = true;
+
+  try {
+    const REPO = 'sunyayiii/team-fund';
+    const API = `https://api.github.com/repos/${REPO}/contents/data.js`;
+
+    // Generate data.js content
+    const dataContent = '// 团建经费数据文件 - 由页面管理模式自动更新\nconst DATA = ' + JSON.stringify(DB, null, 2) + ';\n';
+    const encoded = btoa(unescape(encodeURIComponent(dataContent)));
+
+    // Get current SHA
+    const shaResp = await fetch(API, { headers: { 'Authorization': `token ${token}` } });
+    let sha = null;
+    if (shaResp.ok) { sha = (await shaResp.json()).sha; }
+
+    // Push
+    const body = { message: `数据更新 ${new Date().toLocaleString('zh-CN')}`, content: encoded };
+    if (sha) body.sha = sha;
+
+    const resp = await fetch(API, {
       method: 'PUT',
       headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json' },
       body: JSON.stringify(body)
     });
-    const result = await resp.json();
+
     if (resp.ok) {
-      fileSha = result.content.sha;
-      document.getElementById('saving').classList.remove('show');
+      hasChanges = false;
+      btn.style.display = 'none';
+      showToast('🎉 发布成功！网站将在1-2分钟内更新', 'success');
     } else {
-      throw new Error(result.message || 'Save failed');
+      const err = await resp.json();
+      throw new Error(err.message);
     }
   } catch (e) {
-    console.error('Save failed:', e);
-    document.getElementById('saving').classList.remove('show');
-    showToast('保存失败: ' + e.message, 'error');
+    showToast('发布失败: ' + e.message, 'error');
   }
+  btn.textContent = '🚀 发布'; btn.disabled = false;
 }
 
 // ============================================================
-// Render All
+// Render
 // ============================================================
-function renderAll() {
-  populateFilters();
-  renderHome();
-  renderIncome();
-  renderExpense();
-  renderDetail();
+function renderAll() { populateFilters(); renderHome(); renderIncome(); renderExpense(); renderDetail(); }
+
+function getDateFilter() {
+  const now = new Date();
+  if (currentPeriod === 'month') return new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+  if (currentPeriod === 'quarter') return new Date(now.getFullYear(), Math.floor(now.getMonth()/3)*3, 1).toISOString().split('T')[0];
+  if (currentPeriod === 'year') return new Date(now.getFullYear(), 0, 1).toISOString().split('T')[0];
+  return null;
 }
+
+function periodName() { return {year:'今年',quarter:'本季',month:'本月',all:'全部'}[currentPeriod]; }
 
 function populateFilters() {
-  const cats = DB.income_categories;
-  const members = DB.members;
-  const expCats = DB.expense_categories;
-
-  // Income form
+  const cats = DB.income_categories, members = DB.members, expCats = DB.expense_categories;
   const incomeCatSel = document.getElementById('incomeCat');
-  incomeCatSel.innerHTML = '<option value="">选择分类</option>' + cats.map(c => `<option value="${c.name}" data-amount="${c.default_amount || ''}">${c.name}</option>`).join('');
-  document.getElementById('incomeMember').innerHTML = '<option value="">选择成员</option>' + members.map(m => `<option value="${m}">${m}</option>`).join('');
-  document.getElementById('expenseCat').innerHTML = '<option value="">选择类目</option>' + expCats.map(c => `<option value="${c}">${c}</option>`).join('');
-
-  // Filters
-  document.getElementById('incomeFilterCat').innerHTML = '<option value="">全部分类</option>' + cats.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
-  document.getElementById('incomeFilterMember').innerHTML = '<option value="">全部成员</option>' + members.map(m => `<option value="${m}">${m}</option>`).join('');
-  document.getElementById('expenseFilterCat').innerHTML = '<option value="">全部类目</option>' + expCats.map(c => `<option value="${c}">${c}</option>`).join('');
-  document.getElementById('detailFilterMember').innerHTML = '<option value="">全部成员</option>' + members.map(m => `<option value="${m}">${m}</option>`).join('');
-
-  // Auto-fill default amount
-  incomeCatSel.onchange = () => {
-    const opt = incomeCatSel.selectedOptions[0];
-    const amt = opt?.dataset.amount;
-    if (amt) document.getElementById('incomeAmount').value = amt;
-  };
-
+  incomeCatSel.innerHTML = '<option value="">选择分类</option>' + cats.map(c=>`<option value="${c.name}" data-amount="${c.default_amount||''}">${c.name}</option>`).join('');
+  document.getElementById('incomeMember').innerHTML = '<option value="">选择成员</option>' + members.map(m=>`<option value="${m}">${m}</option>`).join('');
+  document.getElementById('expenseCat').innerHTML = '<option value="">选择类目</option>' + expCats.map(c=>`<option value="${c}">${c}</option>`).join('');
+  document.getElementById('incomeFilterCat').innerHTML = '<option value="">全部分类</option>' + cats.map(c=>`<option value="${c.name}">${c.name}</option>`).join('');
+  document.getElementById('incomeFilterMember').innerHTML = '<option value="">全部成员</option>' + members.map(m=>`<option value="${m}">${m}</option>`).join('');
+  document.getElementById('expenseFilterCat').innerHTML = '<option value="">全部类目</option>' + expCats.map(c=>`<option value="${c}">${c}</option>`).join('');
+  document.getElementById('detailFilterMember').innerHTML = '<option value="">全部成员</option>' + members.map(m=>`<option value="${m}">${m}</option>`).join('');
+  incomeCatSel.onchange = () => { const a = incomeCatSel.selectedOptions[0]?.dataset.amount; if(a) document.getElementById('incomeAmount').value = a; };
   const today = new Date().toISOString().split('T')[0];
   document.getElementById('incomeDate').value = today;
   document.getElementById('expenseDate').value = today;
 }
 
 // ============================================================
-// Home Page
+// Home
 // ============================================================
 function renderHome() {
-  const balance = DB.settings.current_balance || 0;
-  document.getElementById('balanceValue').textContent = `¥${balance.toLocaleString('zh-CN', {minimumFractionDigits: 2})}`;
+  const dateFilter = getDateFilter();
+  const pName = periodName();
+  document.querySelectorAll('.period-tag').forEach(el => el.textContent = pName);
 
-  const totalExpense = DB.expense_records.reduce((s, e) => s + e.amount, 0);
-  document.getElementById('expenseTotal').textContent = `¥${totalExpense.toLocaleString('zh-CN', {minimumFractionDigits: 2})}`;
+  // 个人罚款类收入（排除公司团建费）
+  const personalCats = ['家庭日加班','进度/分享','会议迟到','培训/纪要','个人主动出资'];
+  const personalIncome = DB.income_records.filter(r => personalCats.includes(r.category)).reduce((s,r) => s + r.amount, 0);
+  const totalExpense = DB.expense_records.reduce((s,r) => s + r.amount, 0);
+  const totalReimbursed = DB.expense_records.reduce((s,r) => s + (r.reimbursed_amount || 0), 0);
+  const smallBalance = personalIncome - totalExpense + totalReimbursed;
 
-  const totalIncome = DB.income_records.reduce((s, e) => s + e.amount, 0);
-  document.getElementById('incomeTotal').textContent = `¥${totalIncome.toLocaleString('zh-CN', {minimumFractionDigits: 2})}`;
+  document.getElementById('balanceValue').textContent = `¥${smallBalance.toLocaleString('zh-CN',{minimumFractionDigits:2})}`;
+  document.getElementById('balanceDetail').textContent = `收入${personalIncome.toLocaleString()} - 支出${totalExpense.toLocaleString()} + 报销${totalReimbursed.toLocaleString()}`;
+  document.getElementById('companyBalance').textContent = `¥${(DB.settings.company_balance||0).toLocaleString('zh-CN',{minimumFractionDigits:2})}`;
+
+  // 筛选时间段的收支合计
+  let filteredIncome = DB.income_records;
+  let filteredExpense = DB.expense_records;
+  if (dateFilter) {
+    filteredIncome = filteredIncome.filter(r => r.date >= dateFilter);
+    filteredExpense = filteredExpense.filter(r => r.date >= dateFilter);
+  }
+  document.getElementById('incomeTotal').textContent = `¥${filteredIncome.reduce((s,r)=>s+r.amount,0).toLocaleString('zh-CN',{minimumFractionDigits:2})}`;
+  document.getElementById('expenseTotal').textContent = `¥${filteredExpense.reduce((s,r)=>s+r.amount,0).toLocaleString('zh-CN',{minimumFractionDigits:2})}`;
 
   renderPodium();
 }
 
 function renderPodium() {
-  const now = new Date();
-  let dateFilter = null;
-  if (currentPeriod === 'month') dateFilter = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
-  else if (currentPeriod === 'quarter') dateFilter = new Date(now.getFullYear(), Math.floor(now.getMonth()/3)*3, 1).toISOString().split('T')[0];
-  else if (currentPeriod === 'year') dateFilter = new Date(now.getFullYear(), 0, 1).toISOString().split('T')[0];
-
-  // Only count personal contributions (with member name, exclude company reimbursements)
+  const dateFilter = getDateFilter();
   let records = DB.income_records.filter(r => r.member && r.member !== '');
   if (dateFilter) records = records.filter(r => r.date >= dateFilter);
 
-  // Aggregate
   const totals = {};
-  records.forEach(r => { totals[r.member] = (totals[r.member] || 0) + r.amount; });
+  records.forEach(r => { totals[r.member] = (totals[r.member]||0) + r.amount; });
+  const sorted = Object.entries(totals).sort((a,b) => b[1]-a[1]);
 
-  const sorted = Object.entries(totals).sort((a, b) => b[1] - a[1]);
-  if (sorted.length === 0) {
-    document.getElementById('podium').innerHTML = '<div class="empty">暂无数据</div>';
-    return;
-  }
+  if (!sorted.length) { document.getElementById('podium').innerHTML = '<div class="empty">暂无数据</div>'; return; }
 
-  // Get unique amounts for top 3 ranks
-  const uniqueAmounts = [...new Set(sorted.map(s => s[1]))].slice(0, 3);
-  const ranks = uniqueAmounts.map(amt => ({
-    amount: amt,
-    members: sorted.filter(s => s[1] === amt).map(s => s[0])
-  }));
+  const uniqueAmts = [...new Set(sorted.map(s=>s[1]))].slice(0,3);
+  const ranks = uniqueAmts.map(amt => ({ amount: amt, members: sorted.filter(s=>s[1]===amt).map(s=>s[0]) }));
 
-  const medals = ['gold', 'silver', 'bronze'];
-  const icons = ['🥇', '🥈', '🥉'];
-  const displayOrder = ranks.length >= 2 ? [1, 0, 2] : [0, 1, 2];
-
+  const medals = ['gold','silver','bronze'], icons = ['🥇','🥈','🥉'];
+  const order = ranks.length >= 2 ? [1,0,2] : [0,1,2];
   let html = '';
-  displayOrder.forEach(idx => {
+  order.forEach(idx => {
     if (idx >= ranks.length) return;
-    const rank = ranks[idx];
-    const medal = medals[idx];
-    const names = rank.members;
-    html += `<div class="podium-item">
-      <div class="podium-avatar ${medal}">${names[0][0]}</div>
-      ${names.length === 1
-        ? `<div class="podium-name">${names[0]}</div>`
-        : `<div style="text-align:center">${names.map(n => `<div class="podium-name" style="font-size:12px;">${n}</div>`).join('')}</div>`}
-      <div class="podium-amount">¥${rank.amount.toLocaleString()}</div>
-      <div class="podium-bar ${medal}">${icons[idx]}</div>
-    </div>`;
+    const r = ranks[idx], m = medals[idx];
+    html += `<div class="podium-item"><div class="podium-avatar ${m}">${r.members[0][0]}</div>`;
+    html += r.members.length === 1 ? `<div class="podium-name">${r.members[0]}</div>` : `<div style="text-align:center">${r.members.map(n=>`<div class="podium-name" style="font-size:12px">${n}</div>`).join('')}</div>`;
+    html += `<div class="podium-amount">¥${r.amount.toLocaleString()}</div><div class="podium-bar ${m}">${icons[idx]}</div></div>`;
   });
   document.getElementById('podium').innerHTML = html;
 }
 
 // ============================================================
-// Income
+// Income CRUD
 // ============================================================
 function renderIncome() {
-  const catFilter = document.getElementById('incomeFilterCat').value;
-  const memberFilter = document.getElementById('incomeFilterMember').value;
-  let records = [...DB.income_records].sort((a, b) => b.date.localeCompare(a.date));
-  if (catFilter) records = records.filter(r => r.category === catFilter);
-  if (memberFilter) records = records.filter(r => r.member === memberFilter);
-  records = records.slice(0, 200);
-
+  const cf = document.getElementById('incomeFilterCat').value, mf = document.getElementById('incomeFilterMember').value;
+  let recs = [...DB.income_records].sort((a,b)=>b.date.localeCompare(a.date));
+  if (cf) recs = recs.filter(r=>r.category===cf);
+  if (mf) recs = recs.filter(r=>r.member===mf);
   const list = document.getElementById('incomeList');
-  if (records.length === 0) { list.innerHTML = '<div class="empty">暂无记录</div>'; return; }
-
-  list.innerHTML = records.map(r => `
-    <div class="record-item">
-      <div class="record-info">
-        <div class="record-main">${r.member || '公司'} - ${r.category}</div>
-        <div class="record-sub">${r.date}${r.note ? ' · '+r.note : ''}</div>
-      </div>
-      <div class="record-amount income">+¥${r.amount.toLocaleString()}</div>
-      ${isAdmin ? `<div class="record-actions">
-        <button class="btn btn-outline btn-sm" onclick="editIncome(${r.id})">✏️</button>
-        <button class="btn btn-danger btn-sm" onclick="deleteIncome(${r.id})">🗑</button>
-      </div>` : ''}
-    </div>`).join('');
+  if (!recs.length) { list.innerHTML = '<div class="empty">暂无记录</div>'; return; }
+  list.innerHTML = recs.slice(0,200).map(r=>`<div class="record-item"><div class="record-info"><div class="record-main">${r.member||'公司'} - ${r.category}</div><div class="record-sub">${r.date}${r.note?' · '+r.note:''}</div></div><div class="record-amount income">+¥${r.amount.toLocaleString()}</div>${isAdmin?`<div class="record-actions"><button class="btn btn-outline btn-sm" onclick="editIncome(${r.id})">✏️</button><button class="btn btn-danger btn-sm" onclick="deleteIncome(${r.id})">🗑</button></div>`:''}</div>`).join('');
 }
-
 function addIncome() {
-  const cat = document.getElementById('incomeCat').value;
-  const member = document.getElementById('incomeMember').value;
-  const amount = parseFloat(document.getElementById('incomeAmount').value);
-  const date = document.getElementById('incomeDate').value;
-  const note = document.getElementById('incomeNote').value;
-  if (!cat || !amount || !date) { showToast('请填写必要信息', 'error'); return; }
-
-  const id = Date.now();
-  DB.income_records.push({ id, category: cat, member: member || '', amount, date, note: note || '' });
-  scheduleSave();
-  showToast('收入录入成功！', 'success');
-  document.getElementById('incomeForm').style.display = 'none';
-  document.getElementById('incomeAmount').value = '';
-  document.getElementById('incomeNote').value = '';
-  renderIncome();
-  renderHome();
+  const cat=document.getElementById('incomeCat').value, member=document.getElementById('incomeMember').value, amount=parseFloat(document.getElementById('incomeAmount').value), date=document.getElementById('incomeDate').value, note=document.getElementById('incomeNote').value;
+  if(!cat||!amount||!date){showToast('请填写必要信息','error');return;}
+  DB.income_records.push({id:Date.now(),category:cat,member:member||'',amount,date,note:note||''});
+  markDirty(); showToast('收入录入成功！','success');
+  document.getElementById('incomeForm').style.display='none'; document.getElementById('incomeAmount').value=''; document.getElementById('incomeNote').value='';
+  renderIncome(); renderHome();
 }
-
 function editIncome(id) {
-  const r = DB.income_records.find(x => x.id === id);
-  if (!r) return;
-  document.getElementById('editIncomeId').value = id;
-  document.getElementById('editIncomeCat').innerHTML = DB.income_categories.map(c => `<option value="${c.name}" ${c.name===r.category?'selected':''}>${c.name}</option>`).join('');
-  document.getElementById('editIncomeMember').innerHTML = '<option value="">无</option>' + DB.members.map(m => `<option value="${m}" ${m===r.member?'selected':''}>${m}</option>`).join('');
-  document.getElementById('editIncomeAmount').value = r.amount;
-  document.getElementById('editIncomeDate').value = r.date;
-  document.getElementById('editIncomeNote').value = r.note || '';
+  const r = DB.income_records.find(x=>x.id===id); if(!r) return;
+  document.getElementById('editIncomeId').value=id;
+  document.getElementById('editIncomeCat').innerHTML=DB.income_categories.map(c=>`<option value="${c.name}" ${c.name===r.category?'selected':''}>${c.name}</option>`).join('');
+  document.getElementById('editIncomeMember').innerHTML='<option value="">无</option>'+DB.members.map(m=>`<option value="${m}" ${m===r.member?'selected':''}>${m}</option>`).join('');
+  document.getElementById('editIncomeAmount').value=r.amount; document.getElementById('editIncomeDate').value=r.date; document.getElementById('editIncomeNote').value=r.note||'';
   document.getElementById('editIncomeModal').classList.add('show');
 }
-
 function saveEditIncome() {
-  const id = parseInt(document.getElementById('editIncomeId').value);
-  const r = DB.income_records.find(x => x.id === id);
-  if (!r) return;
-  r.category = document.getElementById('editIncomeCat').value;
-  r.member = document.getElementById('editIncomeMember').value;
-  r.amount = parseFloat(document.getElementById('editIncomeAmount').value);
-  r.date = document.getElementById('editIncomeDate').value;
-  r.note = document.getElementById('editIncomeNote').value;
-  scheduleSave();
-  closeModal('editIncomeModal');
-  showToast('更新成功', 'success');
-  renderIncome(); renderHome();
+  const id=parseInt(document.getElementById('editIncomeId').value), r=DB.income_records.find(x=>x.id===id); if(!r) return;
+  r.category=document.getElementById('editIncomeCat').value; r.member=document.getElementById('editIncomeMember').value;
+  r.amount=parseFloat(document.getElementById('editIncomeAmount').value); r.date=document.getElementById('editIncomeDate').value; r.note=document.getElementById('editIncomeNote').value;
+  markDirty(); closeModal('editIncomeModal'); showToast('更新成功','success'); renderIncome(); renderHome();
 }
-
-function deleteIncome(id) {
-  if (!confirm('确定删除？')) return;
-  DB.income_records = DB.income_records.filter(x => x.id !== id);
-  scheduleSave();
-  showToast('已删除', 'success');
-  renderIncome(); renderHome();
-}
+function deleteIncome(id) { if(!confirm('确定删除？')) return; DB.income_records=DB.income_records.filter(x=>x.id!==id); markDirty(); showToast('已删除','success'); renderIncome(); renderHome(); }
 
 // ============================================================
-// Expense
+// Expense CRUD
 // ============================================================
 function renderExpense() {
-  const catFilter = document.getElementById('expenseFilterCat').value;
-  let records = [...DB.expense_records].sort((a, b) => b.date.localeCompare(a.date));
-  if (catFilter) records = records.filter(r => r.category === catFilter);
-  records = records.slice(0, 200);
-
+  const cf = document.getElementById('expenseFilterCat').value;
+  let recs = [...DB.expense_records].sort((a,b)=>b.date.localeCompare(a.date));
+  if (cf) recs = recs.filter(r=>r.category===cf);
   const list = document.getElementById('expenseList');
-  if (records.length === 0) { list.innerHTML = '<div class="empty">暂无记录</div>'; return; }
-
-  list.innerHTML = records.map(r => {
-    let badge = '';
-    if (r.is_fully_reimbursed) badge = '<span class="badge badge-success">已报销</span>';
-    else if (r.reimbursed_amount > 0) badge = `<span class="badge badge-warning">部分 ¥${r.reimbursed_amount}</span>`;
-    else badge = '<span class="badge badge-info">未报销</span>';
-    return `<div class="record-item">
-      <div class="record-info">
-        <div class="record-main">${r.category} ${badge}</div>
-        <div class="record-sub">${r.date}${r.note ? ' · '+r.note : ''}</div>
-      </div>
-      <div class="record-amount expense">-¥${r.amount.toLocaleString()}</div>
-      ${isAdmin ? `<div class="record-actions">
-        <button class="btn btn-outline btn-sm" onclick="editExpense(${r.id})">✏️</button>
-        <button class="btn btn-danger btn-sm" onclick="deleteExpense(${r.id})">🗑</button>
-      </div>` : ''}
-    </div>`;
+  if (!recs.length) { list.innerHTML = '<div class="empty">暂无记录</div>'; return; }
+  list.innerHTML = recs.slice(0,200).map(r=>{
+    let badge = r.is_fully_reimbursed?'<span class="badge badge-success">已报销</span>':r.reimbursed_amount>0?`<span class="badge badge-warning">部分 ¥${r.reimbursed_amount}</span>`:'<span class="badge badge-info">未报销</span>';
+    return `<div class="record-item"><div class="record-info"><div class="record-main">${r.category} ${badge}</div><div class="record-sub">${r.date}${r.note?' · '+r.note:''}</div></div><div class="record-amount expense">-¥${r.amount.toLocaleString()}</div>${isAdmin?`<div class="record-actions"><button class="btn btn-outline btn-sm" onclick="editExpense(${r.id})">✏️</button><button class="btn btn-danger btn-sm" onclick="deleteExpense(${r.id})">🗑</button></div>`:''}</div>`;
   }).join('');
 }
-
 function addExpense() {
-  const cat = document.getElementById('expenseCat').value;
-  const amount = parseFloat(document.getElementById('expenseAmount').value);
-  const date = document.getElementById('expenseDate').value;
-  const note = document.getElementById('expenseNote').value;
-  const reimbAmount = parseFloat(document.getElementById('expenseReimbAmount').value) || 0;
-  const reimbDate = document.getElementById('expenseReimbDate').value;
-  const reimbDone = document.getElementById('expenseReimbDone').checked;
-  if (!cat || !amount || !date) { showToast('请填写必要信息', 'error'); return; }
-
-  DB.expense_records.push({
-    id: Date.now(), category: cat, amount, date, note: note || '',
-    reimbursed_amount: reimbAmount, reimbursed_date: reimbDate || '', is_fully_reimbursed: reimbDone
-  });
-  scheduleSave();
-  showToast('支出录入成功！', 'success');
-  document.getElementById('expenseForm').style.display = 'none';
-  document.getElementById('expenseAmount').value = '';
-  document.getElementById('expenseNote').value = '';
-  document.getElementById('expenseReimbAmount').value = '0';
-  document.getElementById('expenseReimbDate').value = '';
-  document.getElementById('expenseReimbDone').checked = false;
+  const cat=document.getElementById('expenseCat').value, amount=parseFloat(document.getElementById('expenseAmount').value), date=document.getElementById('expenseDate').value, note=document.getElementById('expenseNote').value;
+  const ra=parseFloat(document.getElementById('expenseReimbAmount').value)||0, rd=document.getElementById('expenseReimbDate').value, done=document.getElementById('expenseReimbDone').checked;
+  if(!cat||!amount||!date){showToast('请填写必要信息','error');return;}
+  DB.expense_records.push({id:Date.now(),category:cat,amount,date,note:note||'',reimbursed_amount:ra,reimbursed_date:rd||'',is_fully_reimbursed:done});
+  markDirty(); showToast('支出录入成功！','success');
+  document.getElementById('expenseForm').style.display='none'; document.getElementById('expenseAmount').value=''; document.getElementById('expenseNote').value='';
   renderExpense(); renderHome();
 }
-
 function editExpense(id) {
-  const r = DB.expense_records.find(x => x.id === id);
-  if (!r) return;
-  document.getElementById('editExpenseId').value = id;
-  document.getElementById('editExpenseCat').innerHTML = DB.expense_categories.map(c => `<option value="${c}" ${c===r.category?'selected':''}>${c}</option>`).join('');
-  document.getElementById('editExpenseAmount').value = r.amount;
-  document.getElementById('editExpenseDate').value = r.date;
-  document.getElementById('editExpenseNote').value = r.note || '';
-  document.getElementById('editExpenseReimbAmount').value = r.reimbursed_amount || 0;
-  document.getElementById('editExpenseReimbDate').value = r.reimbursed_date || '';
-  document.getElementById('editExpenseReimbDone').checked = r.is_fully_reimbursed || false;
+  const r=DB.expense_records.find(x=>x.id===id); if(!r) return;
+  document.getElementById('editExpenseId').value=id;
+  document.getElementById('editExpenseCat').innerHTML=DB.expense_categories.map(c=>`<option value="${c}" ${c===r.category?'selected':''}>${c}</option>`).join('');
+  document.getElementById('editExpenseAmount').value=r.amount; document.getElementById('editExpenseDate').value=r.date; document.getElementById('editExpenseNote').value=r.note||'';
+  document.getElementById('editExpenseReimbAmount').value=r.reimbursed_amount||0; document.getElementById('editExpenseReimbDate').value=r.reimbursed_date||''; document.getElementById('editExpenseReimbDone').checked=r.is_fully_reimbursed||false;
   document.getElementById('editExpenseModal').classList.add('show');
 }
-
 function saveEditExpense() {
-  const id = parseInt(document.getElementById('editExpenseId').value);
-  const r = DB.expense_records.find(x => x.id === id);
-  if (!r) return;
-  r.category = document.getElementById('editExpenseCat').value;
-  r.amount = parseFloat(document.getElementById('editExpenseAmount').value);
-  r.date = document.getElementById('editExpenseDate').value;
-  r.note = document.getElementById('editExpenseNote').value;
-  r.reimbursed_amount = parseFloat(document.getElementById('editExpenseReimbAmount').value) || 0;
-  r.reimbursed_date = document.getElementById('editExpenseReimbDate').value;
-  r.is_fully_reimbursed = document.getElementById('editExpenseReimbDone').checked;
-  scheduleSave();
-  closeModal('editExpenseModal');
-  showToast('更新成功', 'success');
-  renderExpense(); renderHome();
+  const id=parseInt(document.getElementById('editExpenseId').value), r=DB.expense_records.find(x=>x.id===id); if(!r) return;
+  r.category=document.getElementById('editExpenseCat').value; r.amount=parseFloat(document.getElementById('editExpenseAmount').value);
+  r.date=document.getElementById('editExpenseDate').value; r.note=document.getElementById('editExpenseNote').value;
+  r.reimbursed_amount=parseFloat(document.getElementById('editExpenseReimbAmount').value)||0; r.reimbursed_date=document.getElementById('editExpenseReimbDate').value; r.is_fully_reimbursed=document.getElementById('editExpenseReimbDone').checked;
+  markDirty(); closeModal('editExpenseModal'); showToast('更新成功','success'); renderExpense(); renderHome();
 }
-
-function deleteExpense(id) {
-  if (!confirm('确定删除？')) return;
-  DB.expense_records = DB.expense_records.filter(x => x.id !== id);
-  scheduleSave();
-  showToast('已删除', 'success');
-  renderExpense(); renderHome();
-}
+function deleteExpense(id) { if(!confirm('确定删除？')) return; DB.expense_records=DB.expense_records.filter(x=>x.id!==id); markDirty(); showToast('已删除','success'); renderExpense(); renderHome(); }
 
 // ============================================================
 // Detail
 // ============================================================
 function renderDetail() {
-  const dateFrom = document.getElementById('detailDateFrom').value;
-  const dateTo = document.getElementById('detailDateTo').value;
-  const memberFilter = document.getElementById('detailFilterMember').value;
-
+  const df=document.getElementById('detailDateFrom').value, dt=document.getElementById('detailDateTo').value, mf=document.getElementById('detailFilterMember').value;
   let all = [];
-  DB.income_records.forEach(r => {
-    if (dateFrom && r.date < dateFrom) return;
-    if (dateTo && r.date > dateTo) return;
-    if (memberFilter && r.member !== memberFilter) return;
-    all.push({ type: 'income', date: r.date, category: r.category, member: r.member || '公司', amount: r.amount, note: r.note, reimbursed: null });
-  });
-  if (!memberFilter) {
-    DB.expense_records.forEach(r => {
-      if (dateFrom && r.date < dateFrom) return;
-      if (dateTo && r.date > dateTo) return;
-      const reimb = r.is_fully_reimbursed ? '已报销' : (r.reimbursed_amount > 0 ? `部分¥${r.reimbursed_amount}` : '未报销');
-      all.push({ type: 'expense', date: r.date, category: r.category, member: '-', amount: r.amount, note: r.note, reimbursed: reimb });
-    });
-  }
-  all.sort((a, b) => b.date.localeCompare(a.date));
-
-  const list = document.getElementById('detailList');
-  if (all.length === 0) { list.innerHTML = '<div class="empty">暂无记录</div>'; return; }
-
-  list.innerHTML = all.slice(0, 300).map(r => `
-    <div class="record-item">
-      <div class="record-info">
-        <div class="record-main">${r.type==='income'?'💰':'💸'} ${r.category} (${r.member})
-          ${r.reimbursed ? `<span class="badge ${r.reimbursed==='已报销'?'badge-success':r.reimbursed==='未报销'?'badge-info':'badge-warning'}">${r.reimbursed}</span>` : ''}
-        </div>
-        <div class="record-sub">${r.date}${r.note?' · '+r.note:''}</div>
-      </div>
-      <div class="record-amount ${r.type}">${r.type==='income'?'+':'-'}¥${r.amount.toLocaleString()}</div>
-    </div>`).join('');
-
+  DB.income_records.forEach(r=>{if(df&&r.date<df)return;if(dt&&r.date>dt)return;if(mf&&r.member!==mf)return;all.push({type:'income',date:r.date,category:r.category,member:r.member||'公司',amount:r.amount,note:r.note,reimbursed:null});});
+  if(!mf) DB.expense_records.forEach(r=>{if(df&&r.date<df)return;if(dt&&r.date>dt)return;const re=r.is_fully_reimbursed?'已报销':r.reimbursed_amount>0?`部分¥${r.reimbursed_amount}`:'未报销';all.push({type:'expense',date:r.date,category:r.category,member:'-',amount:r.amount,note:r.note,reimbursed:re});});
+  all.sort((a,b)=>b.date.localeCompare(a.date));
   window._detailCache = all;
+  const list = document.getElementById('detailList');
+  if(!all.length){list.innerHTML='<div class="empty">暂无记录</div>';return;}
+  list.innerHTML = all.slice(0,300).map(r=>`<div class="record-item"><div class="record-info"><div class="record-main">${r.type==='income'?'💰':'💸'} ${r.category} (${r.member}) ${r.reimbursed?`<span class="badge ${r.reimbursed==='已报销'?'badge-success':r.reimbursed==='未报销'?'badge-info':'badge-warning'}">${r.reimbursed}</span>`:''}</div><div class="record-sub">${r.date}${r.note?' · '+r.note:''}</div></div><div class="record-amount ${r.type}">${r.type==='income'?'+':'-'}¥${r.amount.toLocaleString()}</div></div>`).join('');
 }
-
 function exportExcel() {
-  const data = window._detailCache || [];
-  if (data.length === 0) { showToast('没有数据可导出', 'error'); return; }
-  const rows = [['类型','日期','分类','成员','金额','备注','报销状态']];
-  data.forEach(r => rows.push([r.type==='income'?'收入':'支出', r.date, r.category, r.member, r.type==='income'?r.amount:-r.amount, r.note, r.reimbursed||'']));
-  const ws = XLSX.utils.aoa_to_sheet(rows);
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, '收支明细');
-  XLSX.writeFile(wb, `团建经费_${new Date().toISOString().split('T')[0]}.xlsx`);
-  showToast('导出成功！', 'success');
+  const data = window._detailCache||[]; if(!data.length){showToast('无数据','error');return;}
+  const rows=[['类型','日期','分类','成员','金额','备注','报销']];
+  data.forEach(r=>rows.push([r.type==='income'?'收入':'支出',r.date,r.category,r.member,r.type==='income'?r.amount:-r.amount,r.note,r.reimbursed||'']));
+  const ws=XLSX.utils.aoa_to_sheet(rows), wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,'收支明细');
+  XLSX.writeFile(wb,`团建经费_${new Date().toISOString().split('T')[0]}.xlsx`); showToast('导出成功！','success');
 }
 
 // ============================================================
 // Settings
 // ============================================================
 function renderSettings() {
-  document.getElementById('settingsBalance').value = DB.settings.current_balance || 0;
-  document.getElementById('membersList').innerHTML = DB.members.map(m =>
-    `<span class="member-tag">${m} <span class="remove" onclick="removeMember('${m}')">×</span></span>`
-  ).join('');
-  document.getElementById('incomeCatList').innerHTML = DB.income_categories.map(c =>
-    `<span class="member-tag">${c.name}${c.default_amount?' (¥'+c.default_amount+')':''} <span class="remove" onclick="removeIncomeCat('${c.name}')">×</span></span>`
-  ).join('');
-  document.getElementById('expenseCatList').innerHTML = DB.expense_categories.map(c =>
-    `<span class="member-tag">${c} <span class="remove" onclick="removeExpenseCat('${c}')">×</span></span>`
-  ).join('');
-  // Token status
+  document.getElementById('settingsCompanyBalance').value = DB.settings.company_balance||0;
+  document.getElementById('membersList').innerHTML = DB.members.map(m=>`<span class="member-tag">${m} <span class="remove" onclick="removeMember('${m}')">×</span></span>`).join('');
+  document.getElementById('incomeCatList').innerHTML = DB.income_categories.map(c=>`<span class="member-tag">${c.name}${c.default_amount?' (¥'+c.default_amount+')':''} <span class="remove" onclick="removeIncomeCat('${c.name}')">×</span></span>`).join('');
+  document.getElementById('expenseCatList').innerHTML = DB.expense_categories.map(c=>`<span class="member-tag">${c} <span class="remove" onclick="removeExpenseCat('${c}')">×</span></span>`).join('');
   const token = getToken();
-  document.getElementById('ghTokenStatus').innerHTML = token
-    ? '<span style="color:var(--success);">✅ 已配置 (ghp_...'+token.slice(-4)+')</span>'
-    : '<span style="color:var(--danger);">❌ 未配置（无法保存数据）</span>';
+  document.getElementById('ghTokenStatus').innerHTML = token ? `<span style="color:var(--success)">✅ 已配置 (...${token.slice(-4)})</span>` : '<span style="color:var(--danger)">❌ 未配置</span>';
 }
-
-function updateBalance() {
-  DB.settings.current_balance = parseFloat(document.getElementById('settingsBalance').value) || 0;
-  scheduleSave(); showToast('余额已更新', 'success'); renderHome();
-}
-
-function addMember() {
-  const name = document.getElementById('newMemberName').value.trim();
-  if (!name || DB.members.includes(name)) return;
-  DB.members.push(name);
-  document.getElementById('newMemberName').value = '';
-  scheduleSave(); showToast('成员已添加', 'success'); renderSettings(); populateFilters();
-}
-
-function removeMember(name) {
-  if (!confirm(`确定移除 ${name}？`)) return;
-  DB.members = DB.members.filter(m => m !== name);
-  scheduleSave(); renderSettings(); populateFilters();
-}
-
-function addIncomeCat() {
-  const name = document.getElementById('newIncomeCat').value.trim();
-  const amt = parseFloat(document.getElementById('newIncomeCatAmount').value) || null;
-  if (!name) return;
-  DB.income_categories.push({ name, default_amount: amt });
-  document.getElementById('newIncomeCat').value = '';
-  document.getElementById('newIncomeCatAmount').value = '';
-  scheduleSave(); showToast('分类已添加', 'success'); renderSettings(); populateFilters();
-}
-
-function removeIncomeCat(name) {
-  DB.income_categories = DB.income_categories.filter(c => c.name !== name);
-  scheduleSave(); renderSettings(); populateFilters();
-}
-
-function addExpenseCat() {
-  const name = document.getElementById('newExpenseCat').value.trim();
-  if (!name) return;
-  DB.expense_categories.push(name);
-  document.getElementById('newExpenseCat').value = '';
-  scheduleSave(); showToast('类目已添加', 'success'); renderSettings(); populateFilters();
-}
-
-function removeExpenseCat(name) {
-  DB.expense_categories = DB.expense_categories.filter(c => c !== name);
-  scheduleSave(); renderSettings(); populateFilters();
-}
-
-function updatePassword() {
-  const pwd = document.getElementById('newPassword').value;
-  if (!pwd) return;
-  DB.settings.admin_password = pwd;
-  scheduleSave(); showToast('密码已更新', 'success'); document.getElementById('newPassword').value = '';
-}
-
-function saveGhToken() {
-  const token = document.getElementById('ghTokenInput').value.trim();
-  if (!token) return;
-  localStorage.setItem('teamfund_gh_token', token);
-  showToast('Token 已保存到本机', 'success');
-  document.getElementById('ghTokenInput').value = '';
-  renderSettings();
-}
+function updateCompanyBalance(){DB.settings.company_balance=parseFloat(document.getElementById('settingsCompanyBalance').value)||0;markDirty();showToast('公司余额已更新','success');renderHome();}
+function addMember(){const n=document.getElementById('newMemberName').value.trim();if(!n||DB.members.includes(n))return;DB.members.push(n);document.getElementById('newMemberName').value='';markDirty();showToast('已添加','success');renderSettings();populateFilters();}
+function removeMember(n){if(!confirm(`移除 ${n}？`))return;DB.members=DB.members.filter(m=>m!==n);markDirty();renderSettings();populateFilters();}
+function addIncomeCatSetting(){const n=document.getElementById('newIncomeCat').value.trim(),a=parseFloat(document.getElementById('newIncomeCatAmount').value)||null;if(!n)return;DB.income_categories.push({name:n,default_amount:a});document.getElementById('newIncomeCat').value='';document.getElementById('newIncomeCatAmount').value='';markDirty();showToast('已添加','success');renderSettings();populateFilters();}
+function removeIncomeCat(n){DB.income_categories=DB.income_categories.filter(c=>c.name!==n);markDirty();renderSettings();populateFilters();}
+function addExpenseCatSetting(){const n=document.getElementById('newExpenseCat').value.trim();if(!n)return;DB.expense_categories.push(n);document.getElementById('newExpenseCat').value='';markDirty();showToast('已添加','success');renderSettings();populateFilters();}
+function removeExpenseCat(n){DB.expense_categories=DB.expense_categories.filter(c=>c!==n);markDirty();renderSettings();populateFilters();}
+function updatePassword(){const p=document.getElementById('newPassword').value;if(!p)return;DB.settings.admin_password=p;markDirty();showToast('密码已更新','success');document.getElementById('newPassword').value='';}
+function saveGhToken(){const t=document.getElementById('ghTokenInput').value.trim();if(!t)return;localStorage.setItem('teamfund_gh_token',t);showToast('Token已保存','success');document.getElementById('ghTokenInput').value='';renderSettings();}
 
 // ============================================================
 // Admin
 // ============================================================
-function toggleAdmin() {
-  if (isAdmin) { isAdmin = false; updateAdminUI(); showToast('已退出管理模式', 'success'); }
-  else { document.getElementById('passwordModal').classList.add('show'); document.getElementById('adminPassword').value = ''; setTimeout(() => document.getElementById('adminPassword').focus(), 100); }
-}
-
-function checkPassword() {
-  const pwd = document.getElementById('adminPassword').value;
-  if (pwd === DB.settings.admin_password) {
-    isAdmin = true; closeModal('passwordModal'); updateAdminUI(); showToast('管理模式已开启', 'success'); renderSettings();
-  } else { showToast('密码错误', 'error'); }
-}
-
-function updateAdminUI() {
-  const btn = document.getElementById('adminBtn');
-  btn.textContent = isAdmin ? '🔓 退出管理' : '🔒 管理';
-  btn.classList.toggle('active', isAdmin);
-  document.getElementById('addIncomeBtn').style.display = isAdmin ? '' : 'none';
-  document.getElementById('addExpenseBtn').style.display = isAdmin ? '' : 'none';
-  document.getElementById('incomeForm').style.display = 'none';
-  document.getElementById('expenseForm').style.display = 'none';
-  document.getElementById('settingsLocked').style.display = isAdmin ? 'none' : '';
-  document.getElementById('settingsContent').style.display = isAdmin ? '' : 'none';
-  renderIncome(); renderExpense();
+function toggleAdmin(){if(isAdmin){isAdmin=false;updateAdminUI();showToast('已退出管理','success');}else{document.getElementById('passwordModal').classList.add('show');document.getElementById('adminPassword').value='';setTimeout(()=>document.getElementById('adminPassword').focus(),100);}}
+function checkPassword(){if(document.getElementById('adminPassword').value===DB.settings.admin_password){isAdmin=true;closeModal('passwordModal');updateAdminUI();showToast('管理模式已开启','success');renderSettings();}else showToast('密码错误','error');}
+function updateAdminUI(){
+  const btn=document.getElementById('adminBtn');btn.textContent=isAdmin?'🔓 退出管理':'🔒 管理';btn.classList.toggle('active',isAdmin);
+  document.getElementById('addIncomeBtn').style.display=isAdmin?'':'none';document.getElementById('addExpenseBtn').style.display=isAdmin?'':'none';
+  document.getElementById('incomeForm').style.display='none';document.getElementById('expenseForm').style.display='none';
+  document.getElementById('settingsLocked').style.display=isAdmin?'none':'';document.getElementById('settingsContent').style.display=isAdmin?'':'none';
+  if(hasChanges) document.getElementById('publishBtn').style.display=isAdmin?'inline-flex':'none';
+  renderIncome();renderExpense();
 }
 
 // ============================================================
-// Navigation
+// Nav
 // ============================================================
-document.querySelectorAll('.nav-item').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    document.getElementById('page-' + btn.dataset.tab).classList.add('active');
-    if (btn.dataset.tab === 'settings' && isAdmin) renderSettings();
-    if (btn.dataset.tab === 'detail') renderDetail();
-  });
-});
+document.querySelectorAll('.nav-item').forEach(btn=>{btn.addEventListener('click',()=>{document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));btn.classList.add('active');document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById('page-'+btn.dataset.tab).classList.add('active');if(btn.dataset.tab==='settings'&&isAdmin)renderSettings();if(btn.dataset.tab==='detail')renderDetail();});});
+document.querySelectorAll('.time-filter').forEach(btn=>{btn.addEventListener('click',()=>{document.querySelectorAll('.time-filter').forEach(b=>b.classList.remove('active'));btn.classList.add('active');currentPeriod=btn.dataset.period;renderHome();});});
 
-document.querySelectorAll('.time-filter').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.time-filter').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    currentPeriod = btn.dataset.period;
-    renderPodium();
-  });
-});
-
-// ============================================================
 // Utils
-// ============================================================
-function showToast(msg, type = '') {
-  const t = document.getElementById('toast');
-  t.textContent = msg; t.className = 'toast show ' + type;
-  setTimeout(() => t.className = 'toast', 3000);
-}
-function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+function showToast(msg,type=''){const t=document.getElementById('toast');t.textContent=msg;t.className='toast show '+type;setTimeout(()=>t.className='toast',3000);}
+function closeModal(id){document.getElementById(id).classList.remove('show');}
 
 // Boot
-loadData();
+renderAll();
 </script>
 </body>
 </html>
