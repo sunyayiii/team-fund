@@ -412,20 +412,23 @@ let saveTimer = null;
 // Load data from GitHub
 async function loadData() {
   try {
-    // Try public raw access first (for read-only visitors)
-    const headers = {};
-    const token = getToken();
-    if (token) headers['Authorization'] = `token ${token}`;
-    const resp = await fetch(API_BASE, { headers });
-    if (resp.status === 404) {
-      // File doesn't exist yet, will be created on first save
-      DB = getEmptyDB();
-      fileSha = null;
+    // First try raw URL (public, no rate limit, works for everyone)
+    const rawResp = await fetch(RAW_BASE + '?t=' + Date.now());
+    if (rawResp.ok) {
+      DB = await rawResp.json();
     } else {
-      const json = await resp.json();
-      fileSha = json.sha;
-      const content = atob(json.content.replace(/\n/g, ''));
-      DB = JSON.parse(new TextDecoder().decode(Uint8Array.from(content, c => c.charCodeAt(0))));
+      DB = getEmptyDB();
+    }
+    // Get SHA separately (needed for saving) - only if token available
+    const token = getToken();
+    if (token) {
+      try {
+        const apiResp = await fetch(API_BASE, { headers: { 'Authorization': `token ${token}` } });
+        if (apiResp.ok) {
+          const json = await apiResp.json();
+          fileSha = json.sha;
+        }
+      } catch(e) { console.warn('Could not get SHA:', e); }
     }
     renderAll();
   } catch (e) {
@@ -456,6 +459,11 @@ async function saveToGitHub() {
   const token = getToken();
   if (!token) { showToast('请先在设置中配置 GitHub Token', 'error'); document.getElementById('saving').classList.remove('show'); return; }
   try {
+    // Get latest SHA if we don't have it
+    if (!fileSha) {
+      const shaResp = await fetch(API_BASE, { headers: { 'Authorization': `token ${token}` } });
+      if (shaResp.ok) { fileSha = (await shaResp.json()).sha; }
+    }
     const content = JSON.stringify(DB, null, 2);
     const encoded = btoa(unescape(encodeURIComponent(content)));
     const body = {
