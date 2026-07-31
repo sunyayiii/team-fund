@@ -286,7 +286,7 @@ select.form-control{appearance:none;background:url("data:image/svg+xml,%3Csvg xm
 // ============================================================
 // State
 // ============================================================
-let DB = JSON.parse(JSON.stringify(DATA)); // Deep clone from data.js
+let DB = (typeof DATA !== 'undefined') ? JSON.parse(JSON.stringify(DATA)) : null;
 let isAdmin = false;
 let hasChanges = false;
 let currentPeriod = 'year';
@@ -300,16 +300,18 @@ function getToken() { return localStorage.getItem('teamfund_gh_token') || ''; }
     const resp = await fetch('https://raw.githubusercontent.com/sunyayiii/team-fund/main/data.js?t=' + Date.now());
     if (resp.ok) {
       const text = await resp.text();
-      // Extract JSON from "const DATA = {...};"
-      const match = text.match(/const DATA = (\{[\s\S]*\});/);
-      if (match) {
-        const freshData = JSON.parse(match[1]);
+      const fn = new Function(text + '; return DATA;');
+      const freshData = fn();
+      if (freshData && freshData.income_records) {
         DB = freshData;
         renderAll();
       }
     }
-  } catch(e) { /* fallback to embedded data.js */ }
+  } catch(e) { console.warn('Refresh from GitHub failed:', e); }
 })();
+
+// Initial render (from local data.js)
+if (DB) renderAll();
 
 // ============================================================
 // Publish to GitHub
@@ -600,8 +602,7 @@ document.querySelectorAll('.time-filter').forEach(btn=>{btn.addEventListener('cl
 function showToast(msg,type=''){const t=document.getElementById('toast');t.textContent=msg;t.className='toast show '+type;setTimeout(()=>t.className='toast',3000);}
 function closeModal(id){document.getElementById(id).classList.remove('show');}
 
-// Boot
-renderAll();
+// Boot - handled above after DB initialization
 </script>
 </body>
 </html>
