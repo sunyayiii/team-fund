@@ -23,7 +23,8 @@ const DATA = {
     "左苏雅",
     "葛依含",
     "姜海燕",
-    "李可"
+    "李可",
+    "王钰林"
   ],
   "income_categories": [
     {
@@ -1165,6 +1166,14 @@ const DATA = {
       "amount": 4714.06,
       "date": "2026-07-31",
       "note": "团建费报销"
+    },
+    {
+      "id": 1785755200924,
+      "category": "会议迟到",
+      "member": "王钰林",
+      "amount": 100,
+      "date": "2026-08-03",
+      "note": ""
     }
   ],
   "expense_records": [
