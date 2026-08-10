@@ -1174,6 +1174,14 @@ const DATA = {
       "amount": 100,
       "date": "2026-08-03",
       "note": ""
+    },
+    {
+      "id": 1786357973133,
+      "category": "会议迟到",
+      "member": "毛宇君",
+      "amount": 100,
+      "date": "2026-08-10",
+      "note": ""
     }
   ],
   "expense_records": [
