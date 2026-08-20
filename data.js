@@ -1186,7 +1186,7 @@ const DATA = {
     },
     {
       "id": 1786957232020,
-      "category": "进度/分享",
+      "category": "会议迟到",
       "member": "曦总",
       "amount": 100,
       "date": "2026-08-17",
@@ -1198,6 +1198,22 @@ const DATA = {
       "member": "朱麒蓉",
       "amount": 50,
       "date": "2026-08-10",
+      "note": ""
+    },
+    {
+      "id": 1787219246241,
+      "category": "会议迟到",
+      "member": "高志华",
+      "amount": 100,
+      "date": "2026-08-20",
+      "note": ""
+    },
+    {
+      "id": 1787219450910,
+      "category": "会议迟到",
+      "member": "毛宇君",
+      "amount": 100,
+      "date": "2026-08-20",
       "note": ""
     }
   ],
