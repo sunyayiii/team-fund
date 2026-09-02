@@ -1239,6 +1239,30 @@ const DATA = {
       "amount": 50,
       "date": "2026-08-25",
       "note": ""
+    },
+    {
+      "id": 1788346329244,
+      "category": "会议迟到",
+      "member": "王峰",
+      "amount": 100,
+      "date": "2026-09-02",
+      "note": ""
+    },
+    {
+      "id": 1788346347046,
+      "category": "会议迟到",
+      "member": "曦总",
+      "amount": 100,
+      "date": "2026-08-31",
+      "note": ""
+    },
+    {
+      "id": 1788346373942,
+      "category": "会议迟到",
+      "member": "刘东亮",
+      "amount": 100,
+      "date": "2026-08-26",
+      "note": ""
     }
   ],
   "expense_records": [
