@@ -1287,6 +1287,14 @@ const DATA = {
       "amount": 50,
       "date": "2026-09-18",
       "note": "误删存哥进度"
+    },
+    {
+      "id": 1790158813451,
+      "category": "家庭日加班",
+      "member": "苏星宇",
+      "amount": 50,
+      "date": "2026-09-02",
+      "note": ""
     }
   ],
   "expense_records": [
