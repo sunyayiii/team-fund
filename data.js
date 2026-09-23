@@ -61,7 +61,7 @@ const DATA = {
   ],
   "settings": {
     "admin_password": "admin",
-    "company_balance": 1999.05
+    "company_balance": 2951.48
   },
   "income_records": [
     {
