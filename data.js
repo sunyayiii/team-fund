@@ -1263,6 +1263,30 @@ const DATA = {
       "amount": 100,
       "date": "2026-08-26",
       "note": ""
+    },
+    {
+      "id": 1790157931550,
+      "category": "会议迟到",
+      "member": "叶帆",
+      "amount": 100,
+      "date": "2026-09-23",
+      "note": ""
+    },
+    {
+      "id": 1790157942679,
+      "category": "会议迟到",
+      "member": "毛宇君",
+      "amount": 100,
+      "date": "2026-09-23",
+      "note": ""
+    },
+    {
+      "id": 1790157972556,
+      "category": "进度/分享",
+      "member": "陈实",
+      "amount": 50,
+      "date": "2026-09-18",
+      "note": "误删存哥进度"
     }
   ],
   "expense_records": [
