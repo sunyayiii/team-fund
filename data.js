@@ -1303,6 +1303,14 @@ const DATA = {
       "amount": 100,
       "date": "2026-10-19",
       "note": ""
+    },
+    {
+      "id": 1792406418504,
+      "category": "会议迟到",
+      "member": "刘东亮",
+      "amount": 100,
+      "date": "2026-10-19",
+      "note": ""
     }
   ],
   "expense_records": [
