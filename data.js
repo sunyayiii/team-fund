@@ -1311,6 +1311,22 @@ const DATA = {
       "amount": 100,
       "date": "2026-10-19",
       "note": ""
+    },
+    {
+      "id": 1792660204113,
+      "category": "会议迟到",
+      "member": "高志华",
+      "amount": 100,
+      "date": "2026-10-22",
+      "note": ""
+    },
+    {
+      "id": 1792662843214,
+      "category": "会议迟到",
+      "member": "李可",
+      "amount": 100,
+      "date": "2026-10-22",
+      "note": ""
     }
   ],
   "expense_records": [
