@@ -117,7 +117,7 @@ select.form-control{appearance:none;background:url("data:image/svg+xml,%3Csvg xm
     <div class="card">
       <div class="card-title">🏢 公司团建余额</div>
       <div class="card-value positive" id="companyBalance">--</div>
-      <div style="font-size:11px;color:var(--text-secondary);margin-top:4px">管理员手动更新</div>
+      <div style="font-size:11px;color:var(--text-secondary);margin-top:4px" id="companyBalanceDetail"></div>
     </div>
   </div>
   <div class="stats-row">
@@ -169,16 +169,19 @@ select.form-control{appearance:none;background:url("data:image/svg+xml,%3Csvg xm
       <div class="form-group"><label>类目</label><select class="form-control" id="expenseCat"></select></div>
       <div class="form-group"><label>金额（元）</label><input type="number" class="form-control" id="expenseAmount"></div>
     </div>
+    <div class="form-group"><label>费用来源</label><select class="form-control" id="expenseSource" onchange="toggleReimbSection('add')"><option value="fund">🏦 部门小金库</option><option value="company">🏢 公司团建费</option></select></div>
     <div class="form-row">
       <div class="form-group"><label>日期</label><input type="date" class="form-control" id="expenseDate"></div>
       <div class="form-group"><label>备注</label><input type="text" class="form-control" id="expenseNote"></div>
     </div>
+    <div id="reimbSectionAdd">
     <h4 style="font-size:14px;margin:12px 0 8px;color:var(--text-secondary)">报销信息</h4>
     <div class="form-row">
       <div class="form-group"><label>报销金额</label><input type="number" class="form-control" id="expenseReimbAmount" value="0"></div>
       <div class="form-group"><label>报销日期</label><input type="date" class="form-control" id="expenseReimbDate"></div>
     </div>
     <div class="form-group"><label><input type="checkbox" id="expenseReimbDone"> 已完成报销</label></div>
+    </div>
     <button class="btn btn-primary btn-block" onclick="addExpense()">确认录入</button>
   </div>
   <div class="card">
@@ -188,6 +191,7 @@ select.form-control{appearance:none;background:url("data:image/svg+xml,%3Csvg xm
     </div>
     <div class="filter-bar">
       <select class="form-control" id="expenseFilterCat" onchange="renderExpense()"><option value="">全部类目</option></select>
+      <select class="form-control" id="expenseFilterSource" onchange="renderExpense()"><option value="">全部来源</option><option value="fund">🏦 小金库</option><option value="company">🏢 公司</option></select>
     </div>
     <div class="record-list" id="expenseList"></div>
   </div>
@@ -273,10 +277,13 @@ select.form-control{appearance:none;background:url("data:image/svg+xml,%3Csvg xm
     <h3>编辑支出记录</h3>
     <input type="hidden" id="editExpenseId">
     <div class="form-row"><div class="form-group"><label>类目</label><select class="form-control" id="editExpenseCat"></select></div><div class="form-group"><label>金额</label><input type="number" class="form-control" id="editExpenseAmount"></div></div>
+    <div class="form-group"><label>费用来源</label><select class="form-control" id="editExpenseSource" onchange="toggleReimbSection('edit')"><option value="fund">🏦 部门小金库</option><option value="company">🏢 公司团建费</option></select></div>
     <div class="form-row"><div class="form-group"><label>日期</label><input type="date" class="form-control" id="editExpenseDate"></div><div class="form-group"><label>备注</label><input type="text" class="form-control" id="editExpenseNote"></div></div>
+    <div id="reimbSectionEdit">
     <h4 style="font-size:14px;margin:12px 0 8px;color:var(--text-secondary)">报销信息</h4>
     <div class="form-row"><div class="form-group"><label>报销金额</label><input type="number" class="form-control" id="editExpenseReimbAmount"></div><div class="form-group"><label>报销日期</label><input type="date" class="form-control" id="editExpenseReimbDate"></div></div>
     <div class="form-group"><label><input type="checkbox" id="editExpenseReimbDone"> 已完成报销</label></div>
+    </div>
     <div style="display:flex;gap:8px;margin-top:16px"><button class="btn btn-primary" onclick="saveEditExpense()">保存</button><button class="btn btn-outline" onclick="closeModal('editExpenseModal')">取消</button></div>
   </div>
 </div>
@@ -380,14 +387,18 @@ function renderHome() {
   const pName = periodName();
   document.querySelectorAll('.period-tag').forEach(el => el.textContent = pName);
 
-  // 部门小金库余额 = 全部收入 - 全部支出（动态，始终是全量）
+  // 部门小金库余额 = 全部收入 - 从小金库出的支出
   const totalIncome = DB.income_records.reduce((s,r) => s + r.amount, 0);
+  const fundExpense = DB.expense_records.filter(r => (r.source||'fund')==='fund').reduce((s,r) => s + r.amount, 0);
+  const companyExpense = DB.expense_records.filter(r => r.source==='company').reduce((s,r) => s + r.amount, 0);
   const totalExpense = DB.expense_records.reduce((s,r) => s + r.amount, 0);
-  const smallBalance = totalIncome - totalExpense;
+  const smallBalance = totalIncome - fundExpense;
 
   document.getElementById('balanceValue').textContent = `¥${smallBalance.toLocaleString('zh-CN',{minimumFractionDigits:2})}`;
-  document.getElementById('balanceDetail').textContent = `全部收入${totalIncome.toLocaleString()} - 全部支出${totalExpense.toLocaleString()}`;
-  document.getElementById('companyBalance').textContent = `¥${(DB.settings.company_balance||0).toLocaleString('zh-CN',{minimumFractionDigits:2})}`;
+  document.getElementById('balanceDetail').textContent = `全部收入${totalIncome.toLocaleString()} - 小金库支出${fundExpense.toLocaleString()}`;
+  const companyBal = (DB.settings.company_balance||0) - companyExpense;
+  document.getElementById('companyBalance').textContent = `¥${companyBal.toLocaleString('zh-CN',{minimumFractionDigits:2})}`;
+  document.getElementById('companyBalanceDetail').textContent = companyExpense > 0 ? `额度${(DB.settings.company_balance||0).toLocaleString()} - 已用${companyExpense.toLocaleString()}` : '管理员在设置中更新额度';
 
   // 筛选时间段的收支合计
   let filteredIncome = DB.income_records;
@@ -474,23 +485,27 @@ function deleteIncome(id) { if(!confirm('确定删除？')) return; DB.income_re
 // ============================================================
 function renderExpense() {
   const cf = document.getElementById('expenseFilterCat').value;
+  const sf = document.getElementById('expenseFilterSource').value;
   let recs = [...DB.expense_records].sort((a,b)=>b.date.localeCompare(a.date));
   if (cf) recs = recs.filter(r=>r.category===cf);
+  if (sf) recs = recs.filter(r=>(r.source||'fund')===sf);
   const list = document.getElementById('expenseList');
   if (!recs.length) { list.innerHTML = '<div class="empty">暂无记录</div>'; return; }
   const total = recs.reduce((s,r)=>s+r.amount, 0);
   list.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:#fef2f2;border-radius:8px;margin-bottom:8px"><span style="font-size:13px;color:var(--text-secondary)">筛选合计 (${recs.length}笔)</span><span style="font-size:16px;font-weight:700;color:var(--danger)">-¥${total.toLocaleString()}</span></div>` + recs.slice(0,200).map(r=>{
-    let badge = r.is_fully_reimbursed?'<span class="badge badge-success">已报销</span>':r.reimbursed_amount>0?`<span class="badge badge-warning">部分 ¥${r.reimbursed_amount}</span>`:'<span class="badge badge-info">未报销</span>';
-    return `<div class="record-item"><div class="record-info"><div class="record-main">${r.category} ${badge}</div><div class="record-sub">${r.date}${r.note?' · '+r.note:''}</div></div><div class="record-amount expense">-¥${r.amount.toLocaleString()}</div>${isAdmin?`<div class="record-actions"><button class="btn btn-outline btn-sm" onclick="editExpense(${r.id})">✏️</button><button class="btn btn-danger btn-sm" onclick="deleteExpense(${r.id})">🗑</button></div>`:''}</div>`;
+    let badge = r.is_fully_reimbursed?'<span class="badge badge-success">已报销</span>':r.reimbursed_amount>0?`<span class="badge badge-warning">部分 ¥${r.reimbursed_amount}</span>`:(r.source||'fund')==='fund'?'<span class="badge badge-info">未报销</span>':'';
+    const srcBadge = (r.source||'fund')==='company'?'<span class="badge" style="background:#dbeafe;color:#1e40af">🏢公司</span>':'<span class="badge" style="background:#fef3c7;color:#92400e">🏦小金库</span>';
+    return `<div class="record-item"><div class="record-info"><div class="record-main">${r.category} ${srcBadge} ${badge}</div><div class="record-sub">${r.date}${r.note?' · '+r.note:''}</div></div><div class="record-amount expense">-¥${r.amount.toLocaleString()}</div>${isAdmin?`<div class="record-actions"><button class="btn btn-outline btn-sm" onclick="editExpense(${r.id})">✏️</button><button class="btn btn-danger btn-sm" onclick="deleteExpense(${r.id})">🗑</button></div>`:''}</div>`;
   }).join('');
 }
 function addExpense() {
   const cat=document.getElementById('expenseCat').value, amount=parseFloat(document.getElementById('expenseAmount').value), date=document.getElementById('expenseDate').value, note=document.getElementById('expenseNote').value;
-  const ra=parseFloat(document.getElementById('expenseReimbAmount').value)||0, rd=document.getElementById('expenseReimbDate').value, done=document.getElementById('expenseReimbDone').checked;
+  const source=document.getElementById('expenseSource').value;
+  const ra=source==='fund'?(parseFloat(document.getElementById('expenseReimbAmount').value)||0):0, rd=source==='fund'?document.getElementById('expenseReimbDate').value:'', done=source==='fund'?document.getElementById('expenseReimbDone').checked:false;
   if(!cat||!amount||!date){showToast('请填写必要信息','error');return;}
-  DB.expense_records.push({id:Date.now(),category:cat,amount,date,note:note||'',reimbursed_amount:ra,reimbursed_date:rd||'',is_fully_reimbursed:done});
+  DB.expense_records.push({id:Date.now(),category:cat,amount,date,note:note||'',source,reimbursed_amount:ra,reimbursed_date:rd||'',is_fully_reimbursed:done});
   markDirty(); showToast('支出录入成功！','success');
-  document.getElementById('expenseForm').style.display='none'; document.getElementById('expenseAmount').value=''; document.getElementById('expenseNote').value='';
+  document.getElementById('expenseForm').style.display='none'; document.getElementById('expenseAmount').value=''; document.getElementById('expenseNote').value=''; document.getElementById('expenseSource').value='fund'; toggleReimbSection('add');
   renderExpense(); renderHome();
 }
 function editExpense(id) {
@@ -498,6 +513,7 @@ function editExpense(id) {
   document.getElementById('editExpenseId').value=id;
   document.getElementById('editExpenseCat').innerHTML=DB.expense_categories.map(c=>`<option value="${c}" ${c===r.category?'selected':''}>${c}</option>`).join('');
   document.getElementById('editExpenseAmount').value=r.amount; document.getElementById('editExpenseDate').value=r.date; document.getElementById('editExpenseNote').value=r.note||'';
+  document.getElementById('editExpenseSource').value=r.source||'fund'; toggleReimbSection('edit');
   document.getElementById('editExpenseReimbAmount').value=r.reimbursed_amount||0; document.getElementById('editExpenseReimbDate').value=r.reimbursed_date||''; document.getElementById('editExpenseReimbDone').checked=r.is_fully_reimbursed||false;
   document.getElementById('editExpenseModal').classList.add('show');
 }
@@ -505,7 +521,9 @@ function saveEditExpense() {
   const id=parseInt(document.getElementById('editExpenseId').value), r=DB.expense_records.find(x=>x.id===id); if(!r) return;
   r.category=document.getElementById('editExpenseCat').value; r.amount=parseFloat(document.getElementById('editExpenseAmount').value);
   r.date=document.getElementById('editExpenseDate').value; r.note=document.getElementById('editExpenseNote').value;
-  r.reimbursed_amount=parseFloat(document.getElementById('editExpenseReimbAmount').value)||0; r.reimbursed_date=document.getElementById('editExpenseReimbDate').value; r.is_fully_reimbursed=document.getElementById('editExpenseReimbDone').checked;
+  r.source=document.getElementById('editExpenseSource').value;
+  if(r.source==='fund'){r.reimbursed_amount=parseFloat(document.getElementById('editExpenseReimbAmount').value)||0; r.reimbursed_date=document.getElementById('editExpenseReimbDate').value; r.is_fully_reimbursed=document.getElementById('editExpenseReimbDone').checked;}
+  else{r.reimbursed_amount=0;r.reimbursed_date='';r.is_fully_reimbursed=false;}
   markDirty(); closeModal('editExpenseModal'); showToast('更新成功','success'); renderExpense(); renderHome();
 }
 function deleteExpense(id) { if(!confirm('确定删除？')) return; DB.expense_records=DB.expense_records.filter(x=>x.id!==id); markDirty(); showToast('已删除','success'); renderExpense(); renderHome(); }
@@ -517,17 +535,17 @@ function renderDetail() {
   const df=document.getElementById('detailDateFrom').value, dt=document.getElementById('detailDateTo').value, mf=document.getElementById('detailFilterMember').value;
   let all = [];
   DB.income_records.forEach(r=>{if(df&&r.date<df)return;if(dt&&r.date>dt)return;if(mf&&r.member!==mf)return;all.push({type:'income',date:r.date,category:r.category,member:r.member||'公司',amount:r.amount,note:r.note,reimbursed:null});});
-  if(!mf) DB.expense_records.forEach(r=>{if(df&&r.date<df)return;if(dt&&r.date>dt)return;const re=r.is_fully_reimbursed?'已报销':r.reimbursed_amount>0?`部分¥${r.reimbursed_amount}`:'未报销';all.push({type:'expense',date:r.date,category:r.category,member:'-',amount:r.amount,note:r.note,reimbursed:re});});
+  if(!mf) DB.expense_records.forEach(r=>{if(df&&r.date<df)return;if(dt&&r.date>dt)return;const re=r.is_fully_reimbursed?'已报销':r.reimbursed_amount>0?`部分¥${r.reimbursed_amount}`:(r.source||'fund')==='fund'?'未报销':'';const src=(r.source||'fund')==='company'?'公司团建费':'小金库';all.push({type:'expense',date:r.date,category:r.category,member:'-',amount:r.amount,note:r.note,reimbursed:re,source:src});});
   all.sort((a,b)=>b.date.localeCompare(a.date));
   window._detailCache = all;
   const list = document.getElementById('detailList');
   if(!all.length){list.innerHTML='<div class="empty">暂无记录</div>';return;}
-  list.innerHTML = all.slice(0,300).map(r=>`<div class="record-item"><div class="record-info"><div class="record-main">${r.type==='income'?'💰':'💸'} ${r.category} (${r.member}) ${r.reimbursed?`<span class="badge ${r.reimbursed==='已报销'?'badge-success':r.reimbursed==='未报销'?'badge-info':'badge-warning'}">${r.reimbursed}</span>`:''}</div><div class="record-sub">${r.date}${r.note?' · '+r.note:''}</div></div><div class="record-amount ${r.type}">${r.type==='income'?'+':'-'}¥${r.amount.toLocaleString()}</div></div>`).join('');
+  list.innerHTML = all.slice(0,300).map(r=>`<div class="record-item"><div class="record-info"><div class="record-main">${r.type==='income'?'💰':'💸'} ${r.category} (${r.member}) ${r.source?`<span class="badge" style="background:#e0e7ff;color:#3730a3">${r.source}</span>`:''} ${r.reimbursed?`<span class="badge ${r.reimbursed==='已报销'?'badge-success':r.reimbursed==='未报销'?'badge-info':'badge-warning'}">${r.reimbursed}</span>`:''}</div><div class="record-sub">${r.date}${r.note?' · '+r.note:''}</div></div><div class="record-amount ${r.type}">${r.type==='income'?'+':'-'}¥${r.amount.toLocaleString()}</div></div>`).join('');
 }
 function exportExcel() {
   const data = window._detailCache||[]; if(!data.length){showToast('无数据','error');return;}
-  const rows=[['类型','日期','分类','成员','金额','备注','报销']];
-  data.forEach(r=>rows.push([r.type==='income'?'收入':'支出',r.date,r.category,r.member,r.type==='income'?r.amount:-r.amount,r.note,r.reimbursed||'']));
+  const rows=[['类型','日期','分类','成员','金额','备注','来源','报销']];
+  data.forEach(r=>rows.push([r.type==='income'?'收入':'支出',r.date,r.category,r.member,r.type==='income'?r.amount:-r.amount,r.note,r.source||'',r.reimbursed||'']));
   const ws=XLSX.utils.aoa_to_sheet(rows), wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,'收支明细');
   XLSX.writeFile(wb,`团建经费_${new Date().toISOString().split('T')[0]}.xlsx`); showToast('导出成功！','success');
 }
@@ -574,6 +592,10 @@ document.querySelectorAll('.nav-item').forEach(btn=>{btn.addEventListener('click
 document.querySelectorAll('.time-filter').forEach(btn=>{btn.addEventListener('click',()=>{document.querySelectorAll('.time-filter').forEach(b=>b.classList.remove('active'));btn.classList.add('active');currentPeriod=btn.dataset.period;renderHome();});});
 
 // Utils
+function toggleReimbSection(mode) {
+  if (mode==='add') { document.getElementById('reimbSectionAdd').style.display = document.getElementById('expenseSource').value==='fund'?'':'none'; }
+  else { document.getElementById('reimbSectionEdit').style.display = document.getElementById('editExpenseSource').value==='fund'?'':'none'; }
+}
 function showToast(msg,type=''){const t=document.getElementById('toast');t.textContent=msg;t.className='toast show '+type;setTimeout(()=>t.className='toast',3000);}
 function closeModal(id){document.getElementById(id).classList.remove('show');}
 
