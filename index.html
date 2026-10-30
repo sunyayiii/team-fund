@@ -387,18 +387,23 @@ function renderHome() {
   const pName = periodName();
   document.querySelectorAll('.period-tag').forEach(el => el.textContent = pName);
 
-  // 部门小金库余额 = 全部收入 - 从小金库出的支出
+  // 余额计算
+  // 小金库：收入 - 小金库支出 + 已报销回来的钱（报销 = 公司替小金库承担了）
+  // 公司：额度 - 直接走公司的支出 - 小金库报销回来的钱
   const totalIncome = DB.income_records.reduce((s,r) => s + r.amount, 0);
   const fundExpense = DB.expense_records.filter(r => (r.source||'fund')==='fund').reduce((s,r) => s + r.amount, 0);
-  const companyExpense = DB.expense_records.filter(r => r.source==='company').reduce((s,r) => s + r.amount, 0);
+  const fundReimbursed = DB.expense_records.filter(r => (r.source||'fund')==='fund').reduce((s,r) => s + (r.reimbursed_amount||0), 0);
+  const companyDirectExpense = DB.expense_records.filter(r => r.source==='company').reduce((s,r) => s + r.amount, 0);
   const totalExpense = DB.expense_records.reduce((s,r) => s + r.amount, 0);
-  const smallBalance = totalIncome - fundExpense;
+  const smallBalance = totalIncome - fundExpense + fundReimbursed;
 
   document.getElementById('balanceValue').textContent = `¥${smallBalance.toLocaleString('zh-CN',{minimumFractionDigits:2})}`;
-  document.getElementById('balanceDetail').textContent = `全部收入${totalIncome.toLocaleString()} - 小金库支出${fundExpense.toLocaleString()}`;
-  const companyBal = (DB.settings.company_balance||0) - companyExpense;
+  const fundNet = fundExpense - fundReimbursed;
+  document.getElementById('balanceDetail').textContent = `收入${totalIncome.toLocaleString()} - 净支出${fundNet.toLocaleString()}` + (fundReimbursed > 0 ? `（已报销¥${fundReimbursed.toLocaleString()}）` : '');
+  const companyUsed = companyDirectExpense + fundReimbursed;
+  const companyBal = (DB.settings.company_balance||0) - companyUsed;
   document.getElementById('companyBalance').textContent = `¥${companyBal.toLocaleString('zh-CN',{minimumFractionDigits:2})}`;
-  document.getElementById('companyBalanceDetail').textContent = companyExpense > 0 ? `额度${(DB.settings.company_balance||0).toLocaleString()} - 已用${companyExpense.toLocaleString()}` : '管理员在设置中更新额度';
+  document.getElementById('companyBalanceDetail').textContent = companyUsed > 0 ? `额度${(DB.settings.company_balance||0).toLocaleString()} - 已用${companyUsed.toLocaleString()}` + (fundReimbursed > 0 ? `（含报销¥${fundReimbursed.toLocaleString()}）` : '') : '管理员在设置中更新额度';
 
   // 筛选时间段的收支合计
   let filteredIncome = DB.income_records;
