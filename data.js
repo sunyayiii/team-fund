@@ -1371,8 +1371,9 @@ const DATA = {
       "date": "2025-04-11",
       "note": "民宿团建",
       "reimbursed_amount": 0,
-      "reimbursed_date": "",
-      "is_fully_reimbursed": false
+      "reimbursed_date": "2025-04-30",
+      "is_fully_reimbursed": false,
+      "source": "fund"
     },
     {
       "id": 3,
@@ -1381,8 +1382,9 @@ const DATA = {
       "date": "2025-06-27",
       "note": "烧烤团建",
       "reimbursed_amount": 0,
-      "reimbursed_date": "",
-      "is_fully_reimbursed": false
+      "reimbursed_date": "2025-06-30",
+      "is_fully_reimbursed": false,
+      "source": "fund"
     },
     {
       "id": 4,
@@ -1401,8 +1403,9 @@ const DATA = {
       "date": "2025-10-17",
       "note": "民宿团建",
       "reimbursed_amount": 0,
-      "reimbursed_date": "",
-      "is_fully_reimbursed": false
+      "reimbursed_date": "2025-10-30",
+      "is_fully_reimbursed": false,
+      "source": "fund"
     },
     {
       "id": 6,
@@ -1410,9 +1413,10 @@ const DATA = {
       "amount": 4662,
       "date": "2026-03-07",
       "note": "聚餐团建",
-      "reimbursed_amount": 4662,
+      "reimbursed_amount": 0,
       "reimbursed_date": "2026-03-08",
-      "is_fully_reimbursed": true
+      "is_fully_reimbursed": false,
+      "source": "fund"
     },
     {
       "id": 7,
@@ -1420,9 +1424,10 @@ const DATA = {
       "amount": 8700.24,
       "date": "2026-07-03",
       "note": "民宿团建",
-      "reimbursed_amount": 4714.06,
+      "reimbursed_amount": 0,
       "reimbursed_date": "2026-07-31",
-      "is_fully_reimbursed": false
+      "is_fully_reimbursed": false,
+      "source": "fund"
     },
     {
       "id": 1793359097743,
@@ -1430,10 +1435,10 @@ const DATA = {
       "amount": 3088.14,
       "date": "2026-10-06",
       "note": "",
-      "reimbursed_amount": 0,
-      "reimbursed_date": "",
-      "is_fully_reimbursed": false,
-      "source": "company"
+      "reimbursed_amount": 3088.14,
+      "reimbursed_date": "2026-10-30",
+      "is_fully_reimbursed": true,
+      "source": "fund"
     }
   ]
 };
