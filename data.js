@@ -61,7 +61,7 @@ const DATA = {
   ],
   "settings": {
     "admin_password": "admin",
-    "company_balance": 2951.48
+    "company_balance": 4951.48
   },
   "income_records": [
     {
@@ -1430,9 +1430,10 @@ const DATA = {
       "amount": 3088.14,
       "date": "2026-10-06",
       "note": "",
-      "reimbursed_amount": 3088.14,
-      "reimbursed_date": "2026-10-30",
-      "is_fully_reimbursed": true
+      "reimbursed_amount": 0,
+      "reimbursed_date": "",
+      "is_fully_reimbursed": false,
+      "source": "company"
     }
   ]
 };
