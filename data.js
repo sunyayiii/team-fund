@@ -1327,6 +1327,30 @@ const DATA = {
       "amount": 100,
       "date": "2026-10-22",
       "note": ""
+    },
+    {
+      "id": 1793358776392,
+      "category": "进度/分享",
+      "member": "肖伶俐",
+      "amount": 50,
+      "date": "2026-10-30",
+      "note": ""
+    },
+    {
+      "id": 1793358787272,
+      "category": "进度/分享",
+      "member": "毛宇君",
+      "amount": 50,
+      "date": "2026-10-30",
+      "note": ""
+    },
+    {
+      "id": 1793358878623,
+      "category": "进度/分享",
+      "member": "刘东亮",
+      "amount": 50,
+      "date": "2026-10-30",
+      "note": ""
     }
   ],
   "expense_records": [
@@ -1399,6 +1423,16 @@ const DATA = {
       "reimbursed_amount": 4714.06,
       "reimbursed_date": "2026-07-31",
       "is_fully_reimbursed": false
+    },
+    {
+      "id": 1793359097743,
+      "category": "聚餐",
+      "amount": 3088.14,
+      "date": "2026-10-06",
+      "note": "",
+      "reimbursed_amount": 3088.14,
+      "reimbursed_date": "2026-10-30",
+      "is_fully_reimbursed": true
     }
   ]
 };
